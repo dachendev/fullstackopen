@@ -26,16 +26,18 @@ const AddPersonForm = ({ addPerson, newName, setNewName, newNumber, setNewNumber
   )
 };
 
-const NumbersLine = ({ person }) => {
+const NumbersLine = ({ person, removePerson }) => {
   return (
-    <p>{person.name} {person.number}</p>
+    <div>
+      {person.name} {person.number} <button onClick={removePerson(person)}>delete</button>
+    </div>
   )
 };
 
-const Numbers = ({ persons }) => {
+const Numbers = ({ persons, removePerson }) => {
   return (
     <div>
-      {persons.map(person => <NumbersLine key={person.id} person={person} />)}
+      {persons.map(person => <NumbersLine key={person.id} person={person} removePerson={removePerson} />)}
     </div>
   );
 };
@@ -66,6 +68,14 @@ const App = () => {
       });
   }
 
+  const removePerson = ({ name, id }) => () => {
+    const result = window.confirm(`Delete ${name}?`);
+    if (result) {
+      personService.remove(id)
+        .then(() => setPersons(persons.filter(p => p.id !== id)));
+    }
+  };
+
   const personsToShow = !filter ? persons : persons.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
   
   return (
@@ -75,7 +85,7 @@ const App = () => {
       <h2>add a new</h2>
       <AddPersonForm addPerson={addPerson} newName={newName} setNewName={setNewName} newNumber={newNumber} setNewNumber={setNewNumber} />
       <h2>Numbers</h2>
-      <Numbers persons={personsToShow} />
+      <Numbers persons={personsToShow} removePerson={removePerson} />
     </div>
   )
 }
