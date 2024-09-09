@@ -51,16 +51,35 @@ const App = () => {
   useEffect(() => {
     personService.getAll()
       .then((returnedPersons) => setPersons(returnedPersons));
-  }, [])
+  }, []);
 
   const addPerson = (event) => {
     event.preventDefault();
-    const personObject = {
+
+    const found = persons.findIndex(p => p.name === newName);
+    if (found > 0) {
+      const confirmOk = window.confirm(`${persons[found].name} is already added to phonebook, replace old number with a new one?`);
+      if (confirmOk) {
+        personService
+          .update(persons[found].id, { ...persons[found], number: newNumber })
+          .then((updatedPerson) => {
+            const personsCopy = [...persons];
+            personsCopy[found] = updatedPerson;
+            setPersons(personsCopy);
+            setNewName("");
+            setNewNumber("");
+          });
+      }
+
+      return;
+    }
+
+    const newPerson = {
       name: newName,
       number: newNumber,
     };
 
-    personService.create(personObject)
+    personService.create(newPerson)
       .then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
         setNewName("");
@@ -77,7 +96,7 @@ const App = () => {
   };
 
   const personsToShow = !filter ? persons : persons.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
-  
+
   return (
     <div>
       <h2>Phonebook</h2>
