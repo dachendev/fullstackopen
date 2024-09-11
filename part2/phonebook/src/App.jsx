@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from "axios";
 import personService from "./services/persons.js";
+import "./index.css";
 
 const SearchFilter = ({ filter, setFilter }) => {
   return (
@@ -42,11 +43,29 @@ const Numbers = ({ persons, removePerson }) => {
   );
 };
 
+const Notification = ({ message }) => {
+  if (message === null) {
+    return null;
+  }
+
+  return (
+    <div className="success">
+      {message}
+    </div>
+  )
+};
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [filter, setFilter] = useState("");
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  const timeoutMessage = (message, time = 5000) => {
+    setSuccessMessage(message);
+    setTimeout(() => setSuccessMessage(null), time);
+  };
 
   useEffect(() => {
     personService.getAll()
@@ -68,6 +87,7 @@ const App = () => {
             setPersons(personsCopy);
             setNewName("");
             setNewNumber("");
+            timeoutMessage(`Updated ${updatedPerson.name}`);
           });
       }
 
@@ -84,14 +104,18 @@ const App = () => {
         setPersons(persons.concat(returnedPerson));
         setNewName("");
         setNewNumber("");
+        timeoutMessage(`Added ${returnedPerson.name}`);
       });
   }
 
-  const removePerson = ({ name, id }) => () => {
-    const result = window.confirm(`Delete ${name}?`);
+  const removePerson = (person) => () => {
+    const result = window.confirm(`Delete ${person.name}?`);
     if (result) {
-      personService.remove(id)
-        .then(() => setPersons(persons.filter(p => p.id !== id)));
+      personService.remove(person.id)
+        .then(() => {
+          setPersons(persons.filter(p => p.id !== person.id));
+          timeoutMessage(`Removed ${person.name}`);
+        });
     }
   };
 
@@ -100,6 +124,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={successMessage} />
       <SearchFilter filter={filter} setFilter={setFilter} />
       <h2>add a new</h2>
       <AddPersonForm addPerson={addPerson} newName={newName} setNewName={setNewName} newNumber={newNumber} setNewNumber={setNewNumber} />
