@@ -43,13 +43,13 @@ const Numbers = ({ persons, removePerson }) => {
   );
 };
 
-const Notification = ({ message }) => {
+const Notification = ({ type, message }) => {
   if (message === null) {
     return null;
   }
 
   return (
-    <div className="success">
+    <div className={type}>
       {message}
     </div>
   )
@@ -61,11 +61,7 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
-
-  const timeoutMessage = (message, time = 5000) => {
-    setSuccessMessage(message);
-    setTimeout(() => setSuccessMessage(null), time);
-  };
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     personService.getAll()
@@ -87,7 +83,13 @@ const App = () => {
             setPersons(personsCopy);
             setNewName("");
             setNewNumber("");
-            timeoutMessage(`Updated ${updatedPerson.name}`);
+            setSuccessMessage(`Updated ${updatedPerson.name}`);
+            setTimeout(() => setSuccessMessage(null), 5000);
+          })
+          .catch((error) => {
+            setErrorMessage(`Information of ${persons[found].name} has already been removed from the server`);
+            setTimeout(() => setErrorMessage(null), 5000);
+            setPersons(persons.filter(p => p.id !== persons[found].id));
           });
       }
 
@@ -104,7 +106,8 @@ const App = () => {
         setPersons(persons.concat(returnedPerson));
         setNewName("");
         setNewNumber("");
-        timeoutMessage(`Added ${returnedPerson.name}`);
+        setSuccessMessage(`Added ${returnedPerson.name}`);
+        setTimeout(() => setSuccessMessage(null), 5000);
       });
   }
 
@@ -114,7 +117,8 @@ const App = () => {
       personService.remove(person.id)
         .then(() => {
           setPersons(persons.filter(p => p.id !== person.id));
-          timeoutMessage(`Removed ${person.name}`);
+          setSuccessMessage(`Removed ${person.name}`);
+          setTimeout(() => setSuccessMessage(null), 5000);
         });
     }
   };
@@ -124,7 +128,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={successMessage} />
+      <Notification type="success" message={successMessage} />
+      <Notification type="error" message={errorMessage} />
       <SearchFilter filter={filter} setFilter={setFilter} />
       <h2>add a new</h2>
       <AddPersonForm addPerson={addPerson} newName={newName} setNewName={setNewName} newNumber={newNumber} setNewNumber={setNewNumber} />
