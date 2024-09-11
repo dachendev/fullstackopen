@@ -1,25 +1,11 @@
 import { useState, useEffect } from "react";
 import countryService from "./services/countries.js";
 
-const DisplayCountries = ({ countries }) => {
-  if (!countries.length) {
-    return null;
-  }
+const Button = ({ text, handleClick }) => {
+  return <button onClick={handleClick}>{text}</button>
+};
 
-  if (countries.length > 10) {
-    return <div>Too many matches, specify another filter</div>;
-  }
-
-  if (countries.length > 1) {
-    return (
-      <div>
-        {countries.map(country => <div key={country.cca2}>{country.name.common}</div>)}
-      </div>
-    );
-  }
-
-  const country = countries[0];
-
+const CountryInfo = ({ country }) => {
   return (
     <div>
       <h1>{country.name.common}</h1>
@@ -32,11 +18,54 @@ const DisplayCountries = ({ countries }) => {
       <img src={country.flags.png} height={200} />
     </div>
   )
+};
+
+const ResultsLine = ({ country, handleShowClicked }) => {
+  return (
+    <div>{country.name.common} <Button text="show" handleClick={() => handleShowClicked()} /></div>
+  );
+};
+
+const FilterResults = ({ countries, setShow }) => {
+  const createHandleShowClicked = (country) => () => setShow(country);
+
+  if (countries === null || !countries.length) {
+    return null;
+  }
+
+  if (countries.length > 10) {
+    return <div>Too many matches, specify another filter</div>;
+  }
+
+  if (countries.length === 1) {
+    return <CountryInfo country={countries[0]} />;
+  }
+
+  return (
+    <div>
+      {countries.map(country =>
+        <ResultsLine
+          key={country.cca2}
+          country={country}
+          handleShowClicked={createHandleShowClicked(country)}
+        />
+      )}
+    </div>
+  );
 }
 
+const Filter = ({ value, handleChange }) => {
+  return (
+    <div>
+      find countries <input value={value} onChange={handleChange} />
+    </div>
+  );
+};
+
 const App = () => {
-  const [query, setQuery] = useState("");
-  const [countries, setCountries] = useState([]);
+  const [countries, setCountries] = useState(null);
+  const [filter, setFilter] = useState("");
+  const [show, setShow] = useState(null);
 
   useEffect(() => {
     countryService
@@ -44,18 +73,34 @@ const App = () => {
       .then((countries) => setCountries(countries));
   }, []);
 
-  const countriesToShow = !query
-    ? []
-    : countries.filter(c => c.name.common.toLowerCase().includes(query.toLowerCase()));
+  const handleFilterChange = (event) => {
+    setFilter(event.target.value);
+    setShow(null);
+  };
 
-  console.log(countriesToShow);
+  const getCountriesToShow = () => {
+    if (!countries) {
+      return null;
+    }
+
+    if (show) {
+      return [show];
+    }
+
+    if (filter) {
+      return countries.filter(country => country.name.common.toLowerCase().includes(filter.toLowerCase()));
+    }
+
+    // if no filter is set, display nothing
+    return [];
+  };
 
   return (
     <div>
-      find countries <input value={query} onChange={(e) => setQuery(e.target.value)} />
-      <DisplayCountries countries={countriesToShow} />
+      <Filter value={filter} handleChange={handleFilterChange} />
+      <FilterResults countries={getCountriesToShow()} setShow={setShow} />
     </div>
   )
 }
 
-export default App
+export default App;
