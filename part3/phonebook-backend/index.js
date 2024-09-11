@@ -7,21 +7,7 @@ const app = express();
 app.use(express.json());
 
 morgan.token("body", (req, res) => JSON.stringify(req.body));
-app.use(morgan((tokens, req, res) => {
-  const fmt = [
-    tokens.method(req, res),
-    tokens.url(req, res),
-    tokens.status(req, res),
-    tokens.res(req, res, "content-length"), "-",
-    tokens["response-time"](req, res), "ms",
-  ];
-
-  if (req.method === "POST") {
-    fmt.push(tokens["body"](req, res));
-  }
-
-  return fmt.join(" ");
-}));
+app.use(morgan(":method :url :status :res[content-length] - :response-time ms :body"))
 
 const random = (min, max) => {
   return Math.floor(Math.random() * (max - min)) + max;
