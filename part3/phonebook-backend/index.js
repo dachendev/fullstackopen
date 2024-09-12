@@ -29,7 +29,7 @@ app.get("/api/persons", (req, res) => {
     .then((people) => res.json(people));
 });
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/persons/:id", (req, res, next) => {
   Person
     .findById(req.params.id)
     .then((person) => {
@@ -42,7 +42,7 @@ app.get("/api/persons/:id", (req, res) => {
     .catch((error) => next(error));
 });
 
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/persons/:id", (req, res, next) => {
   Person
     .findByIdAndDelete(req.params.id)
     .then(() => {
@@ -51,7 +51,7 @@ app.delete("/api/persons/:id", (req, res) => {
     .catch((error) => next(error));
 });
 
-app.put("/api/persons/:id", (req, res) => {
+app.put("/api/persons/:id", (req, res, next) => {
   const body = req.body;
 
   const person = {
