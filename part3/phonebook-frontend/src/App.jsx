@@ -91,9 +91,9 @@ const App = () => {
             setTimeout(() => setSuccessMessage(null), 5000);
           })
           .catch((error) => {
-            setErrorMessage(`Information of ${persons[found].name} has already been removed from the server`);
+            setErrorMessage(error.response.data.error);
             setTimeout(() => setErrorMessage(null), 5000);
-            setPersons(persons.filter(p => p.id !== persons[found].id));
+            // setPersons(persons.filter(p => p.id !== persons[found].id));
           });
       }
 
