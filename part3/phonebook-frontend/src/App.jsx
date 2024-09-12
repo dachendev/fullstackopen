@@ -112,6 +112,9 @@ const App = () => {
         setNewNumber("");
         setSuccessMessage(`Added ${returnedPerson.name}`);
         setTimeout(() => setSuccessMessage(null), 5000);
+      })
+      .catch((error) => {
+        setErrorMessage(error.response.data.error);
       });
   }
 
