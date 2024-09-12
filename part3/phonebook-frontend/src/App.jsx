@@ -36,6 +36,10 @@ const NumbersLine = ({ person, removePerson }) => {
 };
 
 const Numbers = ({ persons, removePerson }) => {
+  if (!persons || !Array.isArray(persons)) {
+    return null;
+  }
+
   return (
     <div>
       {persons.map(person => <NumbersLine key={person.id} person={person} removePerson={removePerson} />)}
