@@ -32,9 +32,40 @@ const mostBlogs = (blogs) => {
   }
 }
 
+const mostLikes = (blogs) => {
+  if (blogs.length === 0) {
+    return null
+  }
+
+  // Lodash is great but we can handle both of these in one step pretty easily
+  // const groups = _.groupBy(blogs, 'author')
+  // const sums = groups.map(group => _.sumBy(group, 'likes'))
+
+  const sums = blogs.reduce(
+    (map, { author, likes }) => {
+      if (!map[author]) {
+        map[author] = 0
+      }
+
+      map[author] += likes
+
+      return map
+    },
+    {}
+  )
+
+  const max = _.maxBy(Object.keys(sums), key => sums[key])
+
+  return {
+    author: max,
+    likes: sums[max]
+  }
+}
+
 module.exports = {
   dummy,
   totalLikes,
   favoriteBlog,
-  mostBlogs
+  mostBlogs,
+  mostLikes
 }
