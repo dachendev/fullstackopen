@@ -90,6 +90,18 @@ describe('when there is initially some blogs saved', () => {
       await api.post('/api/blogs').send(newBlog).expect(400)
     })
   })
+
+  describe('deletion of a blog', () => {
+    test('succeeds with status code 204 if id is valid', async () => {
+      const blogs = await helper.blogsInDb()
+      await api.delete(`/api/blogs/${blogs[0].id}`).expect(204)
+    })
+
+    test('fails with status code 400 if id invalid', async () => {
+      const invalidId = 'keyboard cat'
+      await api.delete(`/api/blogs/${invalidId}`).expect(400)
+    })
+  })
 })
 
 after(async () => {
