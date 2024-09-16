@@ -1,4 +1,4 @@
-const { test, after, beforeEach } = require('node:test')
+const { test, after, beforeEach, describe } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
@@ -36,36 +36,58 @@ test('unique identifier property is named id', async () => {
   assert(firstBlog.hasOwnProperty('id'))
 })
 
-test('creates a new blog', async () => {
-  const newBlog = {
-    title: 'atomic habits',
-    author: 'some guy',
-    likes: 7
-  }
+describe('creating new blogs', () => {
+  test('creates a new blog', async () => {
+    const newBlog = {
+      title: 'Type wars',
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+      likes: 2
+    }
+  
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+  
+    const blogsAfter = await helper.blogsInDb()
+    assert.strictEqual(blogsAfter.length, helper.initialBlogs.length + 1)
+  
+    const titles = blogsAfter.map(b => b.title)
+    assert(titles.includes(newBlog.title))
+  })
 
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+  test('missing likes defaults to zero', async () => {
+    const newBlog = {
+      title: 'Type wars',
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
+    }
+  
+    const response = await api.post('/api/blogs').send(newBlog)
+  
+    const createdBlog = (await helper.blogsInDb()).find(b => b.id === response.body.id)
+    assert.strictEqual(createdBlog.likes, 0)
+  })
 
-  const blogsAfter = await helper.blogsInDb()
-  assert.strictEqual(blogsAfter.length, helper.initialBlogs.length + 1)
+  test('blog with missing title is invalid', async () => {
+    const newBlog = {
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
+    }
 
-  const titles = blogsAfter.map(b => b.title)
-  assert(titles.includes(newBlog.title))
-})
+    await api.post('/api/blogs').send(newBlog).expect(400)
+  })
 
-test('missing likes defaults to zero', async () => {
-  const newBlog = {
-    title: 'art of war',
-    author: 'sun tzu'
-  }
+  test('blog with missing url is invalid', async () => {
+    const newBlog = {
+      title: 'Type wars',
+      author: 'Robert C. Martin',
+    }
 
-  await api.post('/api/blogs').send(newBlog)
-
-  const createdBlog = (await helper.blogsInDb()).find(b => b.title === newBlog.title)
-  assert.strictEqual(createdBlog.likes, 0)
+    await api.post('/api/blogs').send(newBlog).expect(400)
+  })
 })
 
 after(async () => {
