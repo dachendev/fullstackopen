@@ -38,7 +38,9 @@ test('unique identifier property is named id', async () => {
 
 test('creates a new blog', async () => {
   const newBlog = {
-    title: 'atomic habits'
+    title: 'atomic habits',
+    author: 'some guy',
+    likes: 7
   }
 
   await api
@@ -52,6 +54,18 @@ test('creates a new blog', async () => {
 
   const titles = blogsAfter.map(b => b.title)
   assert(titles.includes(newBlog.title))
+})
+
+test('missing likes defaults to zero', async () => {
+  const newBlog = {
+    title: 'art of war',
+    author: 'sun tzu'
+  }
+
+  await api.post('/api/blogs').send(newBlog)
+
+  const createdBlog = (await helper.blogsInDb()).find(b => b.title === newBlog.title)
+  assert.strictEqual(createdBlog.likes, 0)
 })
 
 after(async () => {
