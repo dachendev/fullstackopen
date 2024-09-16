@@ -93,13 +93,39 @@ describe('when there is initially some blogs saved', () => {
 
   describe('deletion of a blog', () => {
     test('succeeds with status code 204 if id is valid', async () => {
-      const blogs = await helper.blogsInDb()
-      await api.delete(`/api/blogs/${blogs[0].id}`).expect(204)
+      const firstBlog = await helper.firstBlog()
+      await api.delete(`/api/blogs/${firstBlog.id}`).expect(204)
     })
 
     test('fails with status code 400 if id invalid', async () => {
       const invalidId = 'keyboard cat'
       await api.delete(`/api/blogs/${invalidId}`).expect(400)
+    })
+  })
+
+  describe('updating a specific blog', () => {
+    test('succeeds with a valid id', async () => {
+      const firstBlog = await helper.firstBlog()
+
+      const blogObject = {
+        ...firstBlog,
+        likes: 20
+      }
+
+      await api
+        .put(`/api/blogs/${firstBlog.id}`)
+        .send(blogObject)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+      const blogsAfter = await helper.blogsInDb()
+      const updatedBlog = blogsAfter.find(b => b.id === firstBlog.id)
+      assert.strictEqual(updatedBlog.likes, blogObject.likes)
+    })
+
+    test('fails with status code 400 if id invalid', async () => {
+      const invalidId = 'keyboard cat'
+      await api.put(`/api/blogs/${invalidId}`).send({}).expect(400)
     })
   })
 })
