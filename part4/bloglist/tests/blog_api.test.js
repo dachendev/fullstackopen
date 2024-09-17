@@ -1,18 +1,32 @@
-const { test, after, beforeEach, describe } = require('node:test')
+const { test, after, beforeEach, describe, before } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const helper = require('./test_helper.js')
 const app = require('../app.js')
 const Blog = require('../models/blog.js')
+const User = require('../models/user.js')
 
 const api = supertest(app)
+
+before(async () => {
+  await User.deleteMany({})
+
+  const user = new User({
+    username: 'firstuser',
+    password: 'number1'
+  })
+
+  await user.save()
+})
 
 beforeEach(async () => {
   await Blog.deleteMany({})
 
-  const blogObjects = helper.initialBlogs.map(blog => new Blog(blog))
+  const firstUser = await User.findOne({})
+  const blogObjects = helper.initialBlogs.map(blog => new Blog({ ...blog, user: firstUser._id }))
   const promiseArray = blogObjects.map(blog => blog.save())
+
   await Promise.all(promiseArray)
 })
 
@@ -35,6 +49,20 @@ describe('when there is initially some blogs saved', () => {
     const firstBlog = response.body[0]
 
     assert(firstBlog.hasOwnProperty('id'))
+  })
+
+  test('blogs have a creator', async () => {
+    const res = await api.get('/api/blogs')
+    const firstBlog = res.body[0]
+
+    assert(firstBlog.hasOwnProperty('user'))
+  })
+
+  test('creator data is populated', async () => {
+    const res = await api.get('/api/blogs')
+    const firstBlog = res.body[0]
+
+    assert(firstBlog.user.hasOwnProperty('id') && firstBlog.user.hasOwnProperty('username'))
   })
 
   describe('addition of a new blog', () => {
@@ -70,6 +98,18 @@ describe('when there is initially some blogs saved', () => {
 
       const createdBlog = (await helper.blogsInDb()).find(b => b.id === response.body.id)
       assert.strictEqual(createdBlog.likes, 0)
+    })
+
+    test('missing creator is assigned', async () => {
+      const newBlog = {
+        title: 'Type wars',
+        author: 'Robert C. Martin',
+        url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
+      }
+
+      const res = await api.post('/api/blogs').send(newBlog)
+
+      assert(res.body.hasOwnProperty('user'))
     })
 
     test('fails with status code 400 if title invalid', async () => {

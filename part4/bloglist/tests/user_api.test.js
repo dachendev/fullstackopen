@@ -47,6 +47,13 @@ describe('when there are initially some users saved', () => {
     assert(!(firstUser.password || firstUser.passwordHash))
   })
 
+  test('user has blogs', async () => {
+    const res = await api.get('/api/users')
+    const firstUser = res.body[0]
+
+    assert(firstUser.hasOwnProperty('blogs'))
+  })
+
   describe('adding a new user', () => {
     test('succeeds with valid data', async () => {
       const usersBefore = await helper.usersInDb()
