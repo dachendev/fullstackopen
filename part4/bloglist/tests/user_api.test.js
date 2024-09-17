@@ -70,23 +70,74 @@ describe('when there are initially some users saved', () => {
       assert(usernames.includes(newUser.username))
     })
 
-    // test('fails with status code 400 if username invalid', async () => {
-    //   const newUser = {
-    //     name: 'Bob Marley',
-    //     password: 'littlebirds3'
-    //   }
+    test('fails with status code 400 if username invalid', async () => {
+      const usersBefore = await helper.usersInDb()
+      const newUser = {
+        password: 'littlebirds3'
+      }
 
-    //   await api.post('/api/users').send(newUser).expect(400)
-    // })
+      await api.post('/api/users').send(newUser).expect(400)
 
-    // test('fails with status code 400 if password invalid', async () => {
-    //   const newUser = {
-    //     username: 'bmarley',
-    //     name: 'Bob Marley'
-    //   }
+      const usersAfter = await helper.usersInDb()
+      assert.strictEqual(usersBefore.length, usersAfter.length)
+    })
 
-    //   await api.post('/api/users').send(newUser).expect(400)
-    // })
+    test('fails with status code 400 if username too short', async () => {
+      const usersBefore = await helper.usersInDb()
+      const newUser = {
+        username: 'bm',
+        password: 'littlebirds3'
+      }
+
+      await api.post('/api/users').send(newUser).expect(400)
+
+      const usersAfter = await helper.usersInDb()
+      assert.strictEqual(usersBefore.length, usersAfter.length)
+    })
+
+    test('fails with status code 400 if username not unique', async () => {
+      const usersBefore = await helper.usersInDb()
+      const newUser = {
+        username: 'root',
+        password: 'secret'
+      }
+
+      const res = await api.post('/api/users').send(newUser).expect(400)
+
+      const usersAfter = await helper.usersInDb()
+      assert.strictEqual(usersBefore.length, usersAfter.length)
+
+      assert(res.body.error.includes('expected `username` to be unique'))
+    })
+
+    test('fails with status code 400 if password invalid', async () => {
+      const usersBefore = await helper.usersInDb()
+      const newUser = {
+        username: 'bmarley'
+      }
+
+      const res = await api.post('/api/users').send(newUser).expect(400)
+
+      const usersAfter = await helper.usersInDb()
+      assert.strictEqual(usersBefore.length, usersAfter.length)
+
+      assert(res.body.error.includes('password invalid'))
+    })
+
+    test('fails with status code 400 if password too short', async () => {
+      const usersBefore = await helper.usersInDb()
+      const newUser = {
+        username: 'bmarley',
+        password: 'lb'
+      }
+
+      const res = await api.post('/api/users').send(newUser).expect(400)
+
+      const usersAfter = await helper.usersInDb()
+      assert.strictEqual(usersBefore.length, usersAfter.length)
+
+      assert(res.body.error.includes('password should be at least 3 characters'))
+    })
   })
 })
 
