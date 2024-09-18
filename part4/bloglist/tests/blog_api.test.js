@@ -1,30 +1,28 @@
-const { test, after, beforeEach, describe, before } = require('node:test')
+const { test, after, beforeEach, describe } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const helper = require('./test_helper.js')
 const app = require('../app.js')
-const Blog = require('../models/blog.js')
-const User = require('../models/user.js')
 
 const api = supertest(app)
 
-let headers
-before(async () => {
-  await Blog.deleteMany({})
-  await User.deleteMany({})
+let firstUser = null
+let firstBlog = null
+let headers = {}
 
-  const defaultUser = await User.create({
-    username: 'default',
-    name: 'Default User',
-    password: 'default'
-  })
+beforeEach(async () => {
+  // create users
+  const users = await helper.seedUsers()
+  firstUser = users[0]
 
-  const promiseArray = helper.initialBlogs.map(blog => Blog.create({ ...blog, user: defaultUser._id }))
-  await Promise.all(promiseArray)
+  // create blogs
+  const blogs = await helper.seedBlogs(firstUser.id)
+  firstBlog = blogs[0]
 
+  // set default headers
   headers = {
-    Authorization: await helper.loginUser()
+    Authorization: helper.auth(firstUser)
   }
 })
 
@@ -37,30 +35,23 @@ describe('when there is initially some blogs saved', () => {
   })
 
   test('all blogs are returned', async () => {
-    const res = await api.get('/api/blogs')
-
-    assert.strictEqual(res.body.length, helper.initialBlogs.length)
+    const response = await api.get('/api/blogs')
+    assert.strictEqual(response.body.length, helper.blogObjects.length)
   })
 
   test('unique identifier property is named id', async () => {
     const response = await api.get('/api/blogs')
-    const firstBlog = response.body[0]
-
-    assert(firstBlog.hasOwnProperty('id'))
+    assert(response.body[0].id)
   })
 
   test('blogs have a creator', async () => {
-    const res = await api.get('/api/blogs')
-    const firstBlog = res.body[0]
-
-    assert(firstBlog.hasOwnProperty('user'))
+    const response = await api.get('/api/blogs')
+    assert(response.body[0].user)
   })
 
   test('creator data is populated', async () => {
-    const res = await api.get('/api/blogs')
-    const firstBlog = res.body[0]
-
-    assert(firstBlog.user.hasOwnProperty('id') && firstBlog.user.hasOwnProperty('username'))
+    const response = await api.get('/api/blogs')
+    assert(response.body[0].user.id && response.body[0].user.username)
   })
 
   describe('addition of a new blog', () => {
@@ -79,8 +70,8 @@ describe('when there is initially some blogs saved', () => {
         .expect(201)
         .expect('Content-Type', /application\/json/)
 
-      const blogsAfter = await helper.blogsInDb()
-      assert.strictEqual(blogsAfter.length, helper.initialBlogs.length + 1)
+      const blogsAfter = await helper.blogs()
+      assert.strictEqual(blogsAfter.length, helper.blogObjects.length + 1)
 
       const titles = blogsAfter.map(b => b.title)
       assert(titles.includes(newBlog.title))
@@ -95,7 +86,7 @@ describe('when there is initially some blogs saved', () => {
 
       const response = await api.post('/api/blogs').set(headers).send(newBlog)
 
-      const createdBlog = (await helper.blogsInDb()).find(b => b.id === response.body.id)
+      const createdBlog = (await helper.blogs()).find(b => b.id === response.body.id)
       assert.strictEqual(createdBlog.likes, 0)
     })
 
@@ -130,41 +121,62 @@ describe('when there is initially some blogs saved', () => {
     })
 
     test('fails with status code 401 if unauthorized', async () => {
-      const blogsBefore = await helper.blogsInDb()
+      const blogsBefore = await helper.blogs()
 
-      const newBlog = {
+      const blogObject = {
         title: 'Type wars',
         author: 'Robert C. Martin',
         url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
         likes: 2
       }
 
-      const response = await api
-        .post('/api/blogs')
-        .send(newBlog)
-        .expect(401)
+      await api.post('/api/blogs').send(blogObject).expect(401)
 
-      const blogsAfter = await helper.blogsInDb()
+      const blogsAfter = await helper.blogs()
       assert.strictEqual(blogsAfter.length, blogsBefore.length)
     })
   })
 
   describe('deletion of a blog', () => {
     test('succeeds with status code 204 if id is valid', async () => {
-      const firstBlog = await helper.firstBlog()
-      await api.delete(`/api/blogs/${firstBlog.id}`).expect(204)
+      await api.delete(`/api/blogs/${firstBlog.id}`).set(headers).expect(204)
     })
 
     test('fails with status code 400 if id invalid', async () => {
       const invalidId = 'keyboard cat'
-      await api.delete(`/api/blogs/${invalidId}`).expect(400)
+      await api.delete(`/api/blogs/${invalidId}`).set(headers).expect(400)
+    })
+
+    test('fails with status code 401 if unauthorized', async () => {
+      await api.delete(`/api/blogs/${firstBlog.id}`).expect(401)
+    })
+
+    test('fails with status code 401 if not creator', async () => {
+      const userObject = {
+        username: 'ducky',
+        password: 'ducky'
+      }
+
+      const response1 = await api.post('/api/users').send(userObject)
+      const savedUser = response1.body
+
+      assert.notStrictEqual(savedUser.id, firstBlog.user.id)
+
+      const headers = {
+        Authorization: helper.auth(savedUser)
+      }
+
+      const response2 = await api
+        .delete(`/api/blogs/${firstBlog.id}`)
+        .set(headers)
+        .expect(401)
+
+      assert(response2.body.error.includes('only the creator can delete this blog'))
     })
   })
 
   describe('updating a specific blog', () => {
     test('succeeds with a valid id', async () => {
-      const firstBlog = await helper.firstBlog()
-
       const blogObject = {
         ...firstBlog,
         likes: 20
@@ -176,7 +188,7 @@ describe('when there is initially some blogs saved', () => {
         .expect(200)
         .expect('Content-Type', /application\/json/)
 
-      const blogsAfter = await helper.blogsInDb()
+      const blogsAfter = await helper.blogs()
       const updatedBlog = blogsAfter.find(b => b.id === firstBlog.id)
       assert.strictEqual(updatedBlog.likes, blogObject.likes)
     })
