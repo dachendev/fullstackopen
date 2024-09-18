@@ -9,25 +9,23 @@ const User = require('../models/user.js')
 
 const api = supertest(app)
 
+let headers
 before(async () => {
+  await Blog.deleteMany({})
   await User.deleteMany({})
 
-  const user = new User({
-    username: 'firstuser',
-    password: 'number1'
+  const defaultUser = await User.create({
+    username: 'default',
+    name: 'Default User',
+    password: 'default'
   })
 
-  await user.save()
-})
-
-beforeEach(async () => {
-  await Blog.deleteMany({})
-
-  const firstUser = await User.findOne({})
-  const blogObjects = helper.initialBlogs.map(blog => new Blog({ ...blog, user: firstUser._id }))
-  const promiseArray = blogObjects.map(blog => blog.save())
-
+  const promiseArray = helper.initialBlogs.map(blog => Blog.create({ ...blog, user: defaultUser._id }))
   await Promise.all(promiseArray)
+
+  headers = {
+    Authorization: await helper.loginUser()
+  }
 })
 
 describe('when there is initially some blogs saved', () => {
@@ -76,6 +74,7 @@ describe('when there is initially some blogs saved', () => {
 
       await api
         .post('/api/blogs')
+        .set(headers)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -94,7 +93,7 @@ describe('when there is initially some blogs saved', () => {
         url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
       }
 
-      const response = await api.post('/api/blogs').send(newBlog)
+      const response = await api.post('/api/blogs').set(headers).send(newBlog)
 
       const createdBlog = (await helper.blogsInDb()).find(b => b.id === response.body.id)
       assert.strictEqual(createdBlog.likes, 0)
@@ -107,7 +106,7 @@ describe('when there is initially some blogs saved', () => {
         url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
       }
 
-      const res = await api.post('/api/blogs').send(newBlog)
+      const res = await api.post('/api/blogs').set(headers).send(newBlog)
 
       assert(res.body.hasOwnProperty('user'))
     })
@@ -118,7 +117,7 @@ describe('when there is initially some blogs saved', () => {
         url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html'
       }
 
-      await api.post('/api/blogs').send(newBlog).expect(400)
+      await api.post('/api/blogs').set(headers).send(newBlog).expect(400)
     })
 
     test('fails with status code 400 if url invalid', async () => {
@@ -127,7 +126,26 @@ describe('when there is initially some blogs saved', () => {
         author: 'Robert C. Martin',
       }
 
-      await api.post('/api/blogs').send(newBlog).expect(400)
+      await api.post('/api/blogs').set(headers).send(newBlog).expect(400)
+    })
+
+    test('fails with status code 401 if unauthorized', async () => {
+      const blogsBefore = await helper.blogsInDb()
+
+      const newBlog = {
+        title: 'Type wars',
+        author: 'Robert C. Martin',
+        url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+        likes: 2
+      }
+
+      const response = await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(401)
+
+      const blogsAfter = await helper.blogsInDb()
+      assert.strictEqual(blogsAfter.length, blogsBefore.length)
     })
   })
 

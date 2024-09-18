@@ -6,6 +6,7 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const blogsRouter = require('./controllers/blogs.js')
 const usersRouter = require('./controllers/users.js')
+const loginRouter = require('./controllers/login.js')
 const logger = require('./utils/logger.js')
 
 mongoose.connect(config.MONGODB_URI)
@@ -13,6 +14,7 @@ mongoose.connect(config.MONGODB_URI)
 app.use(cors())
 app.use(express.json())
 
+app.use('/api/login', loginRouter)
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
 
@@ -27,6 +29,12 @@ const errorHandler = (error, req, res, next) => {
   }
   if (error.name === 'MongoServerError' && error.message.includes('E11000 duplicate key error')) {
     return res.status(400).json({ error: 'expected `username` to be unique' })
+  }
+  if (error.name === 'JsonWebTokenError') {
+    return res.status(401).json({ error: 'token invalid' })
+  }
+  if (error.name === 'TokenExpiredError') {
+    return res.status(401).json({ error: 'token expired' })
   }
 
   next(error)
