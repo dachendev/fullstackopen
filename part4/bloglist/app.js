@@ -9,6 +9,7 @@ const usersRouter = require('./controllers/users.js')
 const loginRouter = require('./controllers/login.js')
 const logger = require('./utils/logger.js')
 const tokenExtractor = require('./middleware/token_extractor.js')
+const userExtractor = require('./middleware/user_extractor.js')
 
 mongoose.connect(config.MONGODB_URI)
 
@@ -17,7 +18,7 @@ app.use(express.json())
 app.use(tokenExtractor())
 
 app.use('/api/login', loginRouter)
-app.use('/api/blogs', blogsRouter)
+app.use('/api/blogs', userExtractor(), blogsRouter)
 app.use('/api/users', usersRouter)
 
 const errorHandler = (error, req, res, next) => {
