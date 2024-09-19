@@ -87,6 +87,9 @@ const App = () => {
 
     try {
       const blog = await blogService.update(id, newObject)
+
+      console.log(blog)
+
       const nextBlogs = blogs.map(o => (o.id === id ? blog : o))
       setBlogs(nextBlogs)
     } catch (error) {
