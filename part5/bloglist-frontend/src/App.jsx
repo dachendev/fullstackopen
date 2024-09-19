@@ -44,7 +44,6 @@ const App = () => {
       const user = await loginService.login({ username, password })
 
       setUser(user)
-      
       blogService.setToken(user.token)
       window.localStorage.setItem('bloglistUser', JSON.stringify(user))
     } catch (error) {
@@ -95,16 +94,16 @@ const App = () => {
     }
   }
 
-  const removeBlog = async (blog) => {
+  const removeBlog = async (id) => {
     console.log('removing blog')
 
     try {
-      await blogService.remove(blog.id)
+      await blogService.remove(id)
 
-      const nextBlogs = blogs.filter(o => o.id !== blog.id)
+      const nextBlogs = blogs.filter(o => o.id !== id)
       setBlogs(nextBlogs)
 
-      setSuccessMessage(`Removed blog ${blog.title} by ${blog.author}`)
+      setSuccessMessage('Removed blog successfuly')
       setTimeout(() => setSuccessMessage(null), 5000)
     } catch (error) {
       setErrorMessage(error.response.data.error)
