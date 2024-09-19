@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import Blog from './components/Blog'
+import LoginForm from './components/LoginForm'
+import NewBlogForm from './components/NewBlogForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import './App.css'
@@ -35,64 +37,15 @@ const Toggleable = forwardRef(({ buttonLabel, children }, refs) => {
   )
 })
 
-const NewBlogForm = ({ createBlog, handleCancel }) => {
-  const [newTitle, setNewTitle] = useState('')
-  const [newAuthor, setNewAuthor] = useState('')
-  const [newUrl, setNewUrl] = useState('')
-
-  const handleSubmit = (event) => {
-    event.preventDefault()
-
-    const blogObject = {
-      title: newTitle,
-      author: newAuthor,
-      url: newUrl
-    }
-
-    createBlog(blogObject)
-
-    setNewTitle('')
-    setNewAuthor('')
-    setNewUrl('')
-  }
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        title: <input value={newTitle} onChange={e => setNewTitle(e.target.value)} />
-      </div>
-      <div>
-        author: <input value={newAuthor} onChange={e => setNewAuthor(e.target.value)} />
-      </div>
-      <div>
-        url: <input value={newUrl} onChange={e => setNewUrl(e.target.value)} />
-      </div>
-      <button type="submit">create</button>
-      <button type="button" onClick={handleCancel}>cancel</button>
-    </form>
-  )
-}
-
 const App = () => {
   const [blogs, setBlogs] = useState([])
-
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-
   const [errorMessage, setErrorMessage] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
-
-  const [newTitle, setNewTitle] = useState('')
-  const [newAuthor, setNewAuthor] = useState('')
-  const [newUrl, setNewUrl] = useState('')
-
   const toggleableRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs(blogs)
-    )
+    blogService.getAll().then(blogs => setBlogs(blogs))
   }, [])
 
   useEffect(() => {
@@ -104,39 +57,36 @@ const App = () => {
     }
   }, [])
 
-  const handleLogin = async (event) => {
-    event.preventDefault()
+  const login = async ({ username, password }) => {
     console.log('logging in with', username, password)
 
     try {
       const user = await loginService.login({ username, password })
 
       setUser(user)
+      
       blogService.setToken(user.token)
       window.localStorage.setItem('bloglistUser', JSON.stringify(user))
-
-      setUsername('')
-      setPassword('')
     } catch (error) {
       setErrorMessage(error.response.data.error)
       setTimeout(() => setErrorMessage(null), 5000)
     }
   }
 
-  const handleLogout = () => {
+  const logout = () => {
     setUser(null)
     blogService.setToken(null)
     window.localStorage.removeItem('bloglistUser')
   }
 
-  const createBlog = async (blogObject) => {
+  const addBlog = async (blogObject) => {
     console.log('creating new blog with', newTitle, newAuthor, newUrl)
 
     try {
       const blog = await blogService.create(blogObject)
 
       setBlogs(blogs.concat(blog))
-      
+
       toggleableRef.current.toggleVisibility()
 
       setSuccessMessage(`a new blog ${blog.title} by ${blog.author} added`)
@@ -147,42 +97,30 @@ const App = () => {
     }
   }
 
-  const handleCancel = () => {
+  const cancelAddBlog = () => {
     console.log('cancel add blog')
     toggleableRef.current.toggleVisibility()
   }
 
-  const loginForm = () => (
-    <>
-      <h2>log in to application</h2>
-      <Notification message={errorMessage} />
-      <Notification message={successMessage} type="success" />
-      <form onSubmit={handleLogin}>
-        <div>
-          username
-          <input type="text" value={username} onChange={e => setUsername(e.target.value)} />
-        </div>
-        <div>
-          password
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
-        </div>
-        <button type="submit">login</button>
-      </form>
-    </>
-  )
-
   if (user === null) {
-    return loginForm()
+    return (
+      <>
+        <Notification message={errorMessage} />
+        <Notification type="success" message={successMessage} />
+        <h2>log in to application</h2>
+        <LoginForm login={login} />
+      </>
+    )
   }
 
   return (
     <>
-      <Notification type="success" message={successMessage} />
       <Notification message={errorMessage} />
+      <Notification type="success" message={successMessage} />
       <h2>blogs</h2>
-      <p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
+      <p>{user.name} logged in <button onClick={logout}>logout</button></p>
       <Toggleable buttonLabel="new blog" ref={toggleableRef}>
-        <NewBlogForm createBlog={createBlog} handleCancel={handleCancel} />
+        <NewBlogForm addBlog={addBlog} cancelAddBlog={cancelAddBlog} />
       </Toggleable>
       {blogs.map(blog => <Blog key={blog.id} blog={blog} />)}
     </>
