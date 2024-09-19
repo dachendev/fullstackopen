@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import LoginForm from './components/LoginForm'
 import NewBlogForm from './components/NewBlogForm'
+import Toggleable from './components/Toggleable'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import './App.css'
@@ -15,27 +16,6 @@ const Notification = ({ message, type = "error" }) => {
     <div className={type}>{message}</div>
   )
 }
-
-const Toggleable = forwardRef(({ buttonLabel, children }, refs) => {
-  const [visible, setVisible] = useState(false)
-
-  const toggleVisibility = () => setVisible(!visible)
-
-  useImperativeHandle(refs, () => {
-    return {
-      toggleVisibility
-    }
-  })
-
-  return (
-    <div>
-      <button onClick={toggleVisibility}>{buttonLabel}</button>
-      <div style={visible ? {} : { display: 'none' }}>
-        {children}
-      </div>
-    </div>
-  )
-})
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
