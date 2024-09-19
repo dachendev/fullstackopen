@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -14,6 +14,27 @@ const Notification = ({ message, type = "error" }) => {
   )
 }
 
+const Toggleable = forwardRef(({ buttonLabel, children }, refs) => {
+  const [visible, setVisible] = useState(false)
+
+  const toggleVisibility = () => setVisible(!visible)
+
+  useImperativeHandle(refs, () => {
+    return {
+      toggleVisibility
+    }
+  })
+
+  return (
+    <div>
+      <button onClick={toggleVisibility}>{buttonLabel}</button>
+      <div style={visible ? {} : { display: 'none' }}>
+        {children}
+      </div>
+    </div>
+  )
+})
+
 const App = () => {
   const [blogs, setBlogs] = useState([])
 
@@ -27,6 +48,8 @@ const App = () => {
   const [newTitle, setNewTitle] = useState('')
   const [newAuthor, setNewAuthor] = useState('')
   const [newUrl, setNewUrl] = useState('')
+
+  const toggleableRef = useRef()
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -84,6 +107,7 @@ const App = () => {
       setNewTitle('')
       setNewAuthor('')
       setNewUrl('')
+      toggleableRef.current.toggleVisibility()
 
       setSuccessMessage(`a new blog ${blog.title} by ${blog.author} added`)
       setTimeout(() => setSuccessMessage(null), 5000)
@@ -93,37 +117,33 @@ const App = () => {
     }
   }
 
-  if (user === null) {
-    return (
-      <>
-        <h2>log in to application</h2>
+  const loginForm = () => (
+    <>
+      <h2>log in to application</h2>
+      <Notification message={errorMessage} />
+      <Notification message={successMessage} type="success" />
+      <form onSubmit={handleLogin}>
+        <div>
+          username
+          <input type="text" value={username} onChange={e => setUsername(e.target.value)} />
+        </div>
+        <div>
+          password
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+        </div>
+        <button type="submit">login</button>
+      </form>
+    </>
+  )
 
-        <Notification message={errorMessage} />
-        <Notification message={successMessage} type="success" />
-
-
-        <form onSubmit={handleLogin}>
-          <div>
-            username
-            <input type="text" value={username} onChange={e => setUsername(e.target.value)} />
-          </div>
-          <div>
-            password
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
-          </div>
-          <button type="submit">login</button>
-        </form>
-      </>
-    )
+  const handleCancel = () => {
+    console.log('cancel add blog')
+    toggleableRef.current.toggleVisibility()
   }
 
-  return (
+  const newBlogForm = () => (
     <>
-      <h2>blogs</h2>
-      <p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
-
       <Notification message={errorMessage} />
-
       <form onSubmit={handleNewBlog}>
         <div>
           title:
@@ -138,8 +158,22 @@ const App = () => {
           <input type="text" value={newUrl} onChange={e => setNewUrl(e.target.value)} />
         </div>
         <button type="submit">create</button>
+        <button type="button" onClick={handleCancel}>cancel</button>
       </form>
+    </>
+  )
 
+  if (user === null) {
+    return loginForm()
+  }
+
+  return (
+    <>
+      <h2>blogs</h2>
+      <p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
+      <Toggleable buttonLabel="new blog" ref={toggleableRef}>
+        {newBlogForm()}
+      </Toggleable>
       {blogs.map(blog => <Blog key={blog.id} blog={blog} />)}
     </>
   )
