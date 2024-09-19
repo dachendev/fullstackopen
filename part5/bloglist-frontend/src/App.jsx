@@ -4,13 +4,13 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import './App.css'
 
-const Notification = ({ message }) => {
+const Notification = ({ message, type = "error" }) => {
   if (!message) {
     return null
   }
 
   return (
-    <div className="error">{message}</div>
+    <div className={type}>{message}</div>
   )
 }
 
@@ -22,6 +22,7 @@ const App = () => {
   const [user, setUser] = useState(null)
 
   const [errorMessage, setErrorMessage] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
 
   const [newTitle, setNewTitle] = useState('')
   const [newAuthor, setNewAuthor] = useState('')
@@ -56,7 +57,7 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (error) {
-      setErrorMessage('Wrong credentials')
+      setErrorMessage(error.response.data.error)
       setTimeout(() => setErrorMessage(null), 5000)
     }
   }
@@ -83,8 +84,11 @@ const App = () => {
       setNewTitle('')
       setNewAuthor('')
       setNewUrl('')
+
+      setSuccessMessage(`a new blog ${blog.title} by ${blog.author} added`)
+      setTimeout(() => setSuccessMessage(null), 5000)
     } catch (error) {
-      setErrorMessage(error.message)
+      setErrorMessage(error.response.data.error)
       setTimeout(() => setErrorMessage(null), 5000)
     }
   }
@@ -93,7 +97,11 @@ const App = () => {
     return (
       <>
         <h2>log in to application</h2>
+
         <Notification message={errorMessage} />
+        <Notification message={successMessage} type="success" />
+
+
         <form onSubmit={handleLogin}>
           <div>
             username
