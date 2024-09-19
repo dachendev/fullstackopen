@@ -60,7 +60,7 @@ const App = () => {
   }
 
   const addBlog = async (blogObject) => {
-    console.log('creating new blog with', newTitle, newAuthor, newUrl)
+    console.log('creating new blog', blogObject)
 
     try {
       const blog = await blogService.create(blogObject)
@@ -87,11 +87,25 @@ const App = () => {
 
     try {
       const blog = await blogService.update(id, newObject)
-
-      console.log(blog)
-
       const nextBlogs = blogs.map(o => (o.id === id ? blog : o))
       setBlogs(nextBlogs)
+    } catch (error) {
+      setErrorMessage(error.response.data.error)
+      setTimeout(() => setErrorMessage(null), 5000)
+    }
+  }
+
+  const removeBlog = async (blog) => {
+    console.log('removing blog')
+
+    try {
+      await blogService.remove(blog.id)
+
+      const nextBlogs = blogs.filter(o => o.id !== blog.id)
+      setBlogs(nextBlogs)
+
+      setSuccessMessage(`Removed blog ${blog.title} by ${blog.author}`)
+      setTimeout(() => setSuccessMessage(null), 5000)
     } catch (error) {
       setErrorMessage(error.response.data.error)
       setTimeout(() => setErrorMessage(null), 5000)
@@ -120,7 +134,7 @@ const App = () => {
       <Toggleable buttonLabel="new blog" ref={toggleableRef}>
         <NewBlogForm addBlog={addBlog} cancelAddBlog={cancelAddBlog} />
       </Toggleable>
-      {sortedBlogs.map(blog => <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />)}
+      {sortedBlogs.map(blog => <Blog key={blog.id} blog={blog} updateBlog={updateBlog} removeBlog={removeBlog} />)}
     </>
   )
 }
