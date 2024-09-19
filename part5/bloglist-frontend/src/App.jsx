@@ -35,6 +35,44 @@ const Toggleable = forwardRef(({ buttonLabel, children }, refs) => {
   )
 })
 
+const NewBlogForm = ({ createBlog, handleCancel }) => {
+  const [newTitle, setNewTitle] = useState('')
+  const [newAuthor, setNewAuthor] = useState('')
+  const [newUrl, setNewUrl] = useState('')
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+
+    const blogObject = {
+      title: newTitle,
+      author: newAuthor,
+      url: newUrl
+    }
+
+    createBlog(blogObject)
+
+    setNewTitle('')
+    setNewAuthor('')
+    setNewUrl('')
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        title: <input value={newTitle} onChange={e => setNewTitle(e.target.value)} />
+      </div>
+      <div>
+        author: <input value={newAuthor} onChange={e => setNewAuthor(e.target.value)} />
+      </div>
+      <div>
+        url: <input value={newUrl} onChange={e => setNewUrl(e.target.value)} />
+      </div>
+      <button type="submit">create</button>
+      <button type="button" onClick={handleCancel}>cancel</button>
+    </form>
+  )
+}
+
 const App = () => {
   const [blogs, setBlogs] = useState([])
 
@@ -91,22 +129,14 @@ const App = () => {
     window.localStorage.removeItem('bloglistUser')
   }
 
-  const handleNewBlog = async (event) => {
-    event.preventDefault()
+  const createBlog = async (blogObject) => {
     console.log('creating new blog with', newTitle, newAuthor, newUrl)
 
     try {
-      const blog = await blogService.create({
-        title: newTitle,
-        author: newAuthor,
-        url: newUrl
-      })
+      const blog = await blogService.create(blogObject)
 
       setBlogs(blogs.concat(blog))
-
-      setNewTitle('')
-      setNewAuthor('')
-      setNewUrl('')
+      
       toggleableRef.current.toggleVisibility()
 
       setSuccessMessage(`a new blog ${blog.title} by ${blog.author} added`)
@@ -115,6 +145,11 @@ const App = () => {
       setErrorMessage(error.response.data.error)
       setTimeout(() => setErrorMessage(null), 5000)
     }
+  }
+
+  const handleCancel = () => {
+    console.log('cancel add blog')
+    toggleableRef.current.toggleVisibility()
   }
 
   const loginForm = () => (
@@ -136,43 +171,18 @@ const App = () => {
     </>
   )
 
-  const handleCancel = () => {
-    console.log('cancel add blog')
-    toggleableRef.current.toggleVisibility()
-  }
-
-  const newBlogForm = () => (
-    <>
-      <Notification message={errorMessage} />
-      <form onSubmit={handleNewBlog}>
-        <div>
-          title:
-          <input type="text" value={newTitle} onChange={e => setNewTitle(e.target.value)} />
-        </div>
-        <div>
-          author:
-          <input type="text" value={newAuthor} onChange={e => setNewAuthor(e.target.value)} />
-        </div>
-        <div>
-          url:
-          <input type="text" value={newUrl} onChange={e => setNewUrl(e.target.value)} />
-        </div>
-        <button type="submit">create</button>
-        <button type="button" onClick={handleCancel}>cancel</button>
-      </form>
-    </>
-  )
-
   if (user === null) {
     return loginForm()
   }
 
   return (
     <>
+      <Notification type="success" message={successMessage} />
+      <Notification message={errorMessage} />
       <h2>blogs</h2>
       <p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
       <Toggleable buttonLabel="new blog" ref={toggleableRef}>
-        {newBlogForm()}
+        <NewBlogForm createBlog={createBlog} handleCancel={handleCancel} />
       </Toggleable>
       {blogs.map(blog => <Blog key={blog.id} blog={blog} />)}
     </>
