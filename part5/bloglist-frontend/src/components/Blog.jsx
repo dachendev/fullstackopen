@@ -1,5 +1,4 @@
 import Toggleable from './Toggleable'
-import blogService from '../services/blogs'
 
 const Blog = ({ blog, updateBlog, removeBlog }) => {
   const blogStyles = {

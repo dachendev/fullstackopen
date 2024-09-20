@@ -7,7 +7,7 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import './App.css'
 
-const Notification = ({ message, type = "error" }) => {
+const Notification = ({ message, type = 'error' }) => {
   if (!message) {
     return null
   }

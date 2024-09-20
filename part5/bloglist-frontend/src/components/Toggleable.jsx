@@ -23,4 +23,6 @@ const Toggleable = forwardRef(({ text, buttonLabel, buttonLabelCollapse = button
   )
 })
 
+Toggleable.displayName = 'Toggleable'
+
 export default Toggleable
