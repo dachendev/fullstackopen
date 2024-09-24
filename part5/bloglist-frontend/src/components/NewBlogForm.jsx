@@ -26,13 +26,13 @@ const NewBlogForm = ({ addBlog, cancelAddBlog }) => {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        title: <input value={newTitle} onChange={e => setNewTitle(e.target.value)} />
+        title: <input name='title' value={newTitle} onChange={e => setNewTitle(e.target.value)} />
       </div>
       <div>
-        author: <input value={newAuthor} onChange={e => setNewAuthor(e.target.value)} />
+        author: <input name='author' value={newAuthor} onChange={e => setNewAuthor(e.target.value)} />
       </div>
       <div>
-        url: <input value={newUrl} onChange={e => setNewUrl(e.target.value)} />
+        url: <input name='url' value={newUrl} onChange={e => setNewUrl(e.target.value)} />
       </div>
       <button type="submit">create</button>
       <button type="button" onClick={handleCancel}>cancel</button>
