@@ -13,8 +13,10 @@ describe('<Blog />', () => {
     }
   }
 
+  const mockUpdateLikes = vi.fn()
+
   beforeEach(() => {
-    render(<Blog blog={blog} />)
+    render(<Blog blog={blog} updateLikes={mockUpdateLikes} />)
   })
 
   test('renders title and author, but not url and likes by default', () => {
@@ -30,5 +32,18 @@ describe('<Blog />', () => {
 
     expect(screen.getByText(blog.url)).toBeVisible()
     expect(screen.getByText(`likes ${blog.likes}`)).toBeVisible()
+    expect(button).toHaveTextContent('hide')
+  })
+
+  test('mock for like button called twice', async () => {
+    const user = userEvent.setup()
+    const showButton = screen.getByText('show')
+    await user.click(showButton)
+
+    const likeButton = screen.getByText('like')
+    await user.click(likeButton)
+    await user.click(likeButton)
+
+    expect(mockUpdateLikes.mock.calls).toHaveLength(2)
   })
 })

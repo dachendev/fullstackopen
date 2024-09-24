@@ -81,12 +81,18 @@ const App = () => {
     toggleableRef.current.toggleVisibility()
   }
 
-  const updateBlog = async (id, newObject) => {
-    console.log('updating blog')
+  const updateLikes = async (blog) => {
+    console.log('like button clicked')
+
+    const newObject = {
+      ...blog,
+      likes: blog.likes + 1,
+      user: blog.user.id
+    }
 
     try {
-      const blog = await blogService.update(id, newObject)
-      const nextBlogs = blogs.map(o => (o.id === id ? blog : o))
+      const blog = await blogService.update(blog.id, newObject)
+      const nextBlogs = blogs.map(o => (o.id === blog.id ? blog : o))
       setBlogs(nextBlogs)
     } catch (error) {
       setErrorMessage(error.response.data.error)
@@ -133,7 +139,7 @@ const App = () => {
       <Toggleable buttonLabel="new blog" ref={toggleableRef}>
         <NewBlogForm addBlog={addBlog} cancelAddBlog={cancelAddBlog} />
       </Toggleable>
-      {sortedBlogs.map(blog => <Blog key={blog.id} blog={blog} updateBlog={updateBlog} removeBlog={removeBlog} />)}
+      {sortedBlogs.map(blog => <Blog key={blog.id} blog={blog} updateLikes={updateLikes} removeBlog={removeBlog} />)}
     </>
   )
 }
