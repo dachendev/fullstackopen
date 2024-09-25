@@ -1,5 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
-const { loginWith } = require('../utils/test-helper.util')
+const { loginWith, createBlog } = require('../utils/test-helper.util')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -30,6 +30,17 @@ describe('Blog app', () => {
 
       const errorElem = await page.locator('.error')
       await expect(errorElem).toContainText('invalid username or password')
+    })
+  })
+
+  describe('when logged in', () => {
+    beforeEach(async ({ page }) => {
+      await loginWith(page, 'dachendev', 'dachendev')
+    })
+
+    test('a new blog can be created', async ({ page }) => {
+      await createBlog(page, '1984', 'George Orwell', 'https://en.wikipedia.org/wiki/Nineteen_Eighty-Four')
+      await expect(page.getByText('1984 George Orwell')).toBeVisible()
     })
   })
 })
