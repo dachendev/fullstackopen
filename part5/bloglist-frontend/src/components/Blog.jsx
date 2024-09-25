@@ -9,6 +9,10 @@ const Blog = ({ blog, updateLikes, removeBlog }) => {
     marginBottom: 5
   }
 
+  const handleUpdateLikes = () => {
+    updateLikes(blog)
+  }
+
   const handleRemove = () => {
     const ok = window.confirm(`Remove blog ${blog.title} by ${blog.author}`)
     if (ok) {
@@ -20,7 +24,7 @@ const Blog = ({ blog, updateLikes, removeBlog }) => {
     <div style={blogStyles}>
       <Toggleable text={`${blog.title} ${blog.author}`} buttonLabel={'show'} buttonLabelCollapse={'hide'}>
         <div>{blog.url}</div>
-        <div>likes {blog.likes} <button onClick={updateLikes}>like</button></div>
+        <div>likes {blog.likes} <button onClick={handleUpdateLikes}>like</button></div>
         <div>{blog.user.name}</div>
         <div>
           <button onClick={handleRemove}>remove</button>

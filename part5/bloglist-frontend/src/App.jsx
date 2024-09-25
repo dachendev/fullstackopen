@@ -91,10 +91,11 @@ const App = () => {
     }
 
     try {
-      const blog = await blogService.update(blog.id, newObject)
-      const nextBlogs = blogs.map(o => (o.id === blog.id ? blog : o))
+      const updatedBlog = await blogService.update(blog.id, newObject)
+      const nextBlogs = blogs.map(o => (o.id === updatedBlog.id ? updatedBlog : o))
       setBlogs(nextBlogs)
     } catch (error) {
+      console.log(error)
       setErrorMessage(error.response.data.error)
       setTimeout(() => setErrorMessage(null), 5000)
     }
