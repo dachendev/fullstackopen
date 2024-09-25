@@ -28,7 +28,7 @@ describe('Blog app', () => {
     test('fails with wrong credentials', async ({ page }) => {
       await loginWith(page, 'dachendev', 'oops')
 
-      const errorElem = await page.locator('.error')
+      const errorElem = page.locator('.error')
       await expect(errorElem).toContainText('invalid username or password')
     })
   })
@@ -49,7 +49,7 @@ describe('Blog app', () => {
       })
 
       test('a blog can be liked', async ({ page }) => {
-        const blogElem = await page.getByText('Pride and Prejudice Jane Austen').locator('..')
+        const blogElem = page.getByText('Pride and Prejudice').locator('..')
         await blogElem.getByRole('button', { name: 'show' }).click()
         const likesButton = blogElem.getByRole('button', { name: 'like' })
         const likesElem = blogElem.getByText('likes')
@@ -59,6 +59,18 @@ describe('Blog app', () => {
 
         await likesButton.click()
         await expect(likesElem).toContainText('2')
+      })
+
+      test('user who added the blog can delete the blog', async ({ page }) => {
+        const blogElem = page.getByText('Pride and Prejudice').locator('..')
+        await blogElem.getByRole('button', { name: 'show' }).click()
+
+        page.on('dialog', dialog => dialog.accept())
+        await blogElem.getByRole('button', { name: 'remove' }).click()
+
+        const successElem = page.locator('.success')
+        await expect(successElem).toContainText('Removed blog successfuly')
+        await expect(page.getByText('Pride and Prejudice')).toHaveCount(0)
       })
     })
   })
