@@ -1,14 +1,23 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
-const { loginWith, createBlog } = require('../utils/test-helper.util')
+const { loginWith, createBlog, logOut } = require('../utils/test-helper.util')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
     await request.post('/api/test/reset')
+
     await request.post('/api/users', {
       data: {
         name: 'Jacob Dachenhaus',
         username: 'dachendev',
         password: 'dachendev'
+      }
+    })
+
+    await request.post('/api/users', {
+      data: {
+        name: 'Other User',
+        username: 'otheruser',
+        password: 'otheruser'
       }
     })
 
@@ -43,6 +52,11 @@ describe('Blog app', () => {
       await expect(page.getByText('1984 George Orwell')).toBeVisible()
     })
 
+    test('user can log out', async ({ page }) => {
+      await logOut(page)
+      await expect(page.getByText('log in to application')).toBeVisible()
+    })
+
     describe('and a blog exists', () => {
       beforeEach(async ({ page }) => {
         await createBlog(page, 'Pride and Prejudice', 'Jane Austen', 'https://en.wikipedia.org/wiki/Pride_and_Prejudice')
@@ -71,6 +85,15 @@ describe('Blog app', () => {
         const successElem = page.locator('.success')
         await expect(successElem).toContainText('Removed blog successfuly')
         await expect(page.getByText('Pride and Prejudice')).toHaveCount(0)
+      })
+
+      test('only the user who created it sees the remove button', async ({ page }) => {
+        await logOut(page)
+        await loginWith(page, 'otheruser', 'otheruser')
+  
+        const blogElem = page.getByText('Pride and Prejudice').locator('..')
+        await blogElem.getByRole('button', { name: 'show' }).click()
+        await expect(blogElem.getByRole('button', { name: 'remove' })).toHaveCount(0)
       })
     })
   })

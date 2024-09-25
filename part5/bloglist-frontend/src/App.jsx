@@ -140,7 +140,7 @@ const App = () => {
       <Toggleable buttonLabel="new blog" ref={toggleableRef}>
         <NewBlogForm addBlog={addBlog} cancelAddBlog={cancelAddBlog} />
       </Toggleable>
-      {sortedBlogs.map(blog => <Blog key={blog.id} blog={blog} updateLikes={updateLikes} removeBlog={removeBlog} />)}
+      {sortedBlogs.map(blog => <Blog key={blog.id} blog={blog} updateLikes={updateLikes} isCreator={user.username === blog.user.username} removeBlog={removeBlog} />)}
     </>
   )
 }

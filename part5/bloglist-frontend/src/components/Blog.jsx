@@ -1,6 +1,6 @@
 import Toggleable from './Toggleable'
 
-const Blog = ({ blog, updateLikes, removeBlog }) => {
+const Blog = ({ blog, updateLikes, isCreator, removeBlog }) => {
   const blogStyles = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -26,9 +26,11 @@ const Blog = ({ blog, updateLikes, removeBlog }) => {
         <div>{blog.url}</div>
         <div>likes {blog.likes} <button onClick={handleUpdateLikes}>like</button></div>
         <div>{blog.user.name}</div>
-        <div>
-          <button onClick={handleRemove}>remove</button>
-        </div>
+        {isCreator ? (
+          <div>
+            <button onClick={handleRemove}>remove</button>
+          </div>
+        ) : null}
       </Toggleable>
     </div>
   )
