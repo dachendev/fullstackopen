@@ -16,4 +16,21 @@ const logOut = async (page) => {
   await page.getByRole('button', { name: 'logout' }).click()
 }
 
-module.exports = { loginWith, createBlog, logOut }
+const incrementLikes = async (page, blogElem, times = 1) => {
+  const showButton = blogElem.getByRole('button', { name: 'show' })
+  if (await showButton.isVisible()) {
+    await showButton.click()
+  }
+
+  const likeButton = blogElem.getByRole('button', { name: 'like' })
+  for (let i = 0; i < times; i++) {
+    await likeButton.click()
+    await page.waitForResponse(response =>
+      response.url().includes('/api/blogs')
+        && response.status() === 200
+        && response.request().method() === 'PUT'
+    )
+  }
+}
+
+module.exports = { loginWith, createBlog, logOut, incrementLikes }

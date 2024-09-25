@@ -21,7 +21,7 @@ const Blog = ({ blog, updateLikes, isCreator, removeBlog }) => {
   }
 
   return (
-    <div style={blogStyles}>
+    <div className="blog" style={blogStyles}>
       <Toggleable text={`${blog.title} ${blog.author}`} buttonLabel={'show'} buttonLabelCollapse={'hide'}>
         <div>{blog.url}</div>
         <div>likes {blog.likes} <button onClick={handleUpdateLikes}>like</button></div>
