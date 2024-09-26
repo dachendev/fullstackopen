@@ -19,23 +19,37 @@ const asObject = (anecdote) => {
 
 const initialState = anecdotesAtStart.map(asObject)
 
+const actionTypes = {
+  CREATE: 'anecdotes/create',
+  VOTE: 'anecdotes/vote'
+}
+
 const reducer = (state = initialState, action) => {
   // console.log('state now: ', state)
   console.log('action', action)
 
-  if (action.type === 'anecdote/add-vote') {
+  if (action.type === actionTypes.CREATE) {
+    return state.concat(asObject(action.payload))
+  }
+
+  if (action.type === actionTypes.VOTE) {
     const nextState = [...state]
     const anecdote = nextState.find(p => p.id === action.payload)
     anecdote.votes++
-    
+
     return nextState
   }
 
   return state
 }
 
-export const addVoteTo = (id) => ({
-  type: 'anecdote/add-vote',
+export const createAnecdote = (content) => ({
+  type: actionTypes.CREATE,
+  payload: content
+})
+
+export const addVote = (id) => ({
+  type: actionTypes.VOTE,
   payload: id
 })
 
