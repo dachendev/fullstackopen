@@ -24,7 +24,7 @@ Here's a list of the main parts of the course and my progress:
 - [x] [Part 2: Communicating with server](https://fullstackopen.com/en/part2)
 - [x] [Part 3: Programming a server with NodeJS and Express](https://fullstackopen.com/en/part3)
 - [x] [Part 4: Testing Express servers, user administration](https://fullstackopen.com/en/part4)
-- [ ] [Part 5: Testing React apps](https://fullstackopen.com/en/part5)
+- [x] [Part 5: Testing React apps](https://fullstackopen.com/en/part5)
 - [ ] [Part 6: Advanced state management](https://fullstackopen.com/en/part6)
 - [ ] [Part 7: React router, custom hooks, styling app with CSS and webpack](https://fullstackopen.com/en/part7)
 - [ ] [Part 8: GraphQL](https://fullstackopen.com/en/part8)
