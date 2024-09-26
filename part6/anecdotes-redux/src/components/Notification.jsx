@@ -9,9 +9,13 @@ const Notification = () => {
 
   const notification = useSelector(state => state.notification)
   
+  if (!notification.content) {
+    return null
+  }
+  
   return (
     <div style={style}>
-      {notification}
+      {notification.content}
     </div>
   )
 }
