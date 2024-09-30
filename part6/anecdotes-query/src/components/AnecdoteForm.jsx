@@ -25,6 +25,10 @@ const AnecdoteForm = () => {
         onSuccess: (newAnecdote) => {
           notifDispatch({ type: 'notif/set', payload: `Created '${newAnecdote.content}'` })
           setTimeout(() => notifDispatch({ type: 'notif/clear' }), 5000)
+        },
+        onError: (error) => {
+          notifDispatch({ type: 'notif/set', payload: error.response.data.error })
+          setTimeout(() => notifDispatch({ type: 'notif/clear' }), 5000)
         }
       }
     )
