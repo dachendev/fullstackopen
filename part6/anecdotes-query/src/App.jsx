@@ -1,10 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getAnecdotes, updateAnecdote } from './anecdoteRequests'
 import AnecdoteForm from './components/AnecdoteForm'
 import Notification from './components/Notification'
+import { useNotifDispatch } from './NotifContext'
 
 const App = () => {
   const queryClient = useQueryClient()
+  const notifDispatch = useNotifDispatch()
 
   const updateAnecdoteMutation = useMutation({
     mutationFn: updateAnecdote,
@@ -28,10 +30,17 @@ const App = () => {
   }
 
   const handleVote = (anecdote) => {
-    updateAnecdoteMutation.mutate({
-      ...anecdote,
-      votes: anecdote.votes + 1
-    })
+    updateAnecdoteMutation.mutate(
+      {
+        ...anecdote,
+        votes: anecdote.votes + 1
+      },
+      {
+        onSuccess: (newAnecdote) => {
+          notifDispatch({ type: 'notif/set', payload: `Voted '${newAnecdote.content}'` })
+          setTimeout(() => notifDispatch({ type: 'notif/clear' }), 5000)
+        }
+      })
     console.log('vote')
   }
 
@@ -40,10 +49,10 @@ const App = () => {
   return (
     <div>
       <h3>Anecdote app</h3>
-    
+
       <Notification />
       <AnecdoteForm />
-    
+
       {anecdotes.map(anecdote =>
         <div key={anecdote.id}>
           <div>
