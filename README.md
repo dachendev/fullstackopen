@@ -25,7 +25,7 @@ Here's a list of the main parts of the course and my progress:
 - [x] [Part 3: Programming a server with NodeJS and Express](./part3)
 - [x] [Part 4: Testing Express servers, user administration](./part4)
 - [x] [Part 5: Testing React apps](./part5)
-- [ ] [Part 6: Advanced state management](./part6)
+- [x] [Part 6: Advanced state management](./part6)
 - [ ] [Part 7: React router, custom hooks, styling app with CSS and webpack](./part7)
 - [ ] [Part 8: GraphQL](./part8)
 - [ ] [Part 9: TypeScript](./part9)
