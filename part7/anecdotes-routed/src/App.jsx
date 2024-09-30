@@ -4,7 +4,8 @@ import {
   Routes,
   Route,
   Link,
-  useParams
+  useParams,
+  useNavigate
 } from 'react-router-dom'
 
 const Menu = () => {
@@ -73,6 +74,8 @@ const Footer = () => (
 )
 
 const CreateNew = (props) => {
+  const navigate = useNavigate()
+
   const [content, setContent] = useState('')
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
@@ -86,6 +89,7 @@ const CreateNew = (props) => {
       info,
       votes: 0
     })
+    navigate('/')
   }
 
   return (
@@ -108,10 +112,26 @@ const CreateNew = (props) => {
       </form>
     </div>
   )
+}
 
+const Notification = ({ message }) => {
+  if (!message) {
+    return null
+  }
+
+  const style = {
+    border: '1px solid #000',
+    padding: '10px',
+    marginBottom: '10px'
+  }
+
+  return (
+    <div style={style}>{message}</div>
+  )
 }
 
 const App = () => {
+
   const [anecdotes, setAnecdotes] = useState([
     {
       content: 'If it hurts, do it more often',
@@ -134,6 +154,8 @@ const App = () => {
   const addNew = (anecdote) => {
     anecdote.id = Math.round(Math.random() * 10000)
     setAnecdotes(anecdotes.concat(anecdote))
+    setNotification(`Added '${anecdote.content}' by ${anecdote.author}`)
+    setTimeout(() => setNotification(''), 5000)
   }
 
   const anecdoteById = (id) =>
@@ -152,6 +174,7 @@ const App = () => {
 
   return (
     <div>
+      <Notification message={notification} />
       <h1>Software anecdotes</h1>
       <Router>
         <Menu />
