@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useRef } from 'react'
 import Blog from './components/Blog'
 import LoginForm from './components/LoginForm'
 import NewBlogForm from './components/NewBlogForm'
 import Toggleable from './components/Toggleable'
 import { useNotificationContext } from './NotificationContext'
+import { createBlog, deleteBlog, getBlogs, updateBlog } from './requests'
 import loginService from './services/login'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getBlogs, createBlog, updateBlog, deleteBlog, setToken } from './requests'
+import { useUserContext } from './UserContext'
 
 const Notification = () => {
   const notification = useNotificationContext()[0]
@@ -27,9 +28,9 @@ const Notification = () => {
 
 const App = () => {
   const queryClient = useQueryClient()
-  const [user, setUser] = useState(null)
   const toggleableRef = useRef()
   const notificationDispatch = useNotificationContext()[1]
+  const [user, userDispatch] = useUserContext()
 
   const result = useQuery({
     queryKey: ['blogs'],
@@ -66,24 +67,12 @@ const App = () => {
     },
   })
 
-  useEffect(() => {
-    const userJSON = window.localStorage.getItem('bloglistUser')
-    if (userJSON) {
-      const user = JSON.parse(userJSON)
-      setUser(user)
-      setToken(user.token)
-    }
-  }, [])
-
   const login = async ({ username, password }) => {
     console.log('logging in with', username, password)
 
     try {
       const user = await loginService.login({ username, password })
-
-      setUser(user)
-      setToken(user.token)
-      window.localStorage.setItem('bloglistUser', JSON.stringify(user))
+      userDispatch({ type: 'user/set', payload: user })
     } catch (error) {
       notificationDispatch({
         type: 'notification/set',
@@ -94,9 +83,7 @@ const App = () => {
   }
 
   const logout = () => {
-    setUser(null)
-    setToken(null)
-    window.localStorage.removeItem('bloglistUser')
+    userDispatch({ type: 'user/reset' })
   }
 
   const addBlog = async (newBlog) => {
@@ -168,7 +155,7 @@ const App = () => {
     })
   }
 
-  if (user === null) {
+  if (!user) {
     return (
       <>
         <Notification />
