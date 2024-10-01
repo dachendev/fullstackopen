@@ -6,6 +6,8 @@ import Toggleable from './components/Toggleable'
 import { useNotificationContext } from './NotificationContext'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getBlogs, createBlog, updateBlog, removeBlog, setToken } from './requests'
 
 const Notification = () => {
   const notification = useNotificationContext()[0]
@@ -25,21 +27,32 @@ const Notification = () => {
 }
 
 const App = () => {
+  const queryClient = useQueryClient()
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
   const toggleableRef = useRef()
   const notificationDispatch = useNotificationContext()[1]
 
-  useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
-  }, [])
+  const result = useQuery({
+    queryKey: ['blogs'],
+    queryFn: getBlogs,
+    refetchOnWindowFocus: false,
+  })
+
+  const newBlogMutation = useMutation({
+    mutationFn: createBlog,
+    onSuccess: (newBlog) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      queryClient.setQueryData(['blogs'], blogs.concat(newBlog))
+    },
+  })
 
   useEffect(() => {
     const userJSON = window.localStorage.getItem('bloglistUser')
     if (userJSON) {
       const user = JSON.parse(userJSON)
       setUser(user)
-      blogService.setToken(user.token)
+      setToken(user.token)
     }
   }, [])
 
@@ -50,54 +63,42 @@ const App = () => {
       const user = await loginService.login({ username, password })
 
       setUser(user)
-      blogService.setToken(user.token)
+      setToken(user.token)
       window.localStorage.setItem('bloglistUser', JSON.stringify(user))
     } catch (error) {
       notificationDispatch({
         type: 'notification/set',
         payload: error.response.data.error,
       })
-      setTimeout(
-        () => notificationDispatch({ type: 'notification/reset' }),
-        5000,
-      )
+      setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
     }
   }
 
   const logout = () => {
     setUser(null)
-    blogService.setToken(null)
+    setToken(null)
     window.localStorage.removeItem('bloglistUser')
   }
 
-  const addBlog = async (blogObject) => {
-    console.log('creating new blog', blogObject)
+  const addBlog = async (newBlog) => {
+    console.log('creating new blog', newBlog)
 
     try {
-      const blog = await blogService.create(blogObject)
-      console.log('new blog:', blog)
-
-      setBlogs(blogs.concat(blog))
+      newBlogMutation.mutate(newBlog)
 
       toggleableRef.current.toggleVisibility()
 
       notificationDispatch({
         type: 'notification/set',
-        payload: `a new blog ${blog.title} by ${blog.author} added`,
+        payload: `a new blog ${newBlog.title} by ${newBlog.author} added`,
       })
-      setTimeout(
-        () => notificationDispatch({ type: 'notification/reset' }),
-        5000,
-      )
+      setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
     } catch (error) {
       notificationDispatch({
         type: 'notification/set',
         payload: error.response.data.error,
       })
-      setTimeout(
-        () => notificationDispatch({ type: 'notification/reset' }),
-        5000,
-      )
+      setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
     }
   }
 
@@ -117,9 +118,7 @@ const App = () => {
 
     try {
       const updatedBlog = await blogService.update(blog.id, newObject)
-      const nextBlogs = blogs.map((o) =>
-        o.id === updatedBlog.id ? updatedBlog : o,
-      )
+      const nextBlogs = blogs.map((o) => (o.id === updatedBlog.id ? updatedBlog : o))
       setBlogs(nextBlogs)
     } catch (error) {
       console.log(error)
@@ -127,10 +126,7 @@ const App = () => {
         type: 'notification/set',
         payload: error.response.data.error,
       })
-      setTimeout(
-        () => notificationDispatch({ type: 'notification/reset' }),
-        5000,
-      )
+      setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
     }
   }
 
@@ -147,19 +143,13 @@ const App = () => {
         type: 'notification/set',
         payload: 'Removed blog successfuly',
       })
-      setTimeout(
-        () => notificationDispatch({ type: 'notification/reset' }),
-        5000,
-      )
+      setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
     } catch (error) {
       notificationDispatch({
         type: 'notification/set',
         payload: error.response.data.error,
       })
-      setTimeout(
-        () => notificationDispatch({ type: 'notification/reset' }),
-        5000,
-      )
+      setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
     }
   }
 
@@ -173,7 +163,11 @@ const App = () => {
     )
   }
 
-  const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes)
+  if (result.isLoading) {
+    return <div>Loading data...</div>
+  }
+
+  const sortedBlogs = result.data.sort((a, b) => b.likes - a.likes)
 
   return (
     <>
