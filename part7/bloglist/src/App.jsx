@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import { Link, Navigate, Route, BrowserRouter as Router, Routes, useParams } from 'react-router-dom'
 import BlogList from './components/BlogList'
 import LoginForm from './components/LoginForm'
 import NewBlogForm from './components/NewBlogForm'
@@ -54,7 +54,53 @@ const Home = () => (
   </>
 )
 
-const Users = () => {
+const Users = ({ users }) => (
+  <>
+    <h2>Users</h2>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>blogs created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {users.map((user) => (
+          <tr key={user.id}>
+            <td>
+              <Link to={`/users/${user.id}`}>{user.name}</Link>
+            </td>
+            <td>{user.blogs.length}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </>
+)
+
+const User = ({ users }) => {
+  const id = useParams().id
+  const user = users.find((p) => p.id === id)
+
+  if (!user) {
+    return <div>Loading data...</div>
+  }
+
+  return (
+    <div>
+      <h2>{user.name}</h2>
+      <h3>added blogs</h3>
+      <ul>
+        {user.blogs.map((blog) => (
+          <li key={blog.id}>{blog.title}</li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+const App = () => {
+  const user = useUserContext()[0]
   const [users, setUsers] = useState([])
   const userService = useApiService('/api/users')
 
@@ -63,37 +109,12 @@ const Users = () => {
   }, [])
 
   return (
-    <>
-      <h2>Users</h2>
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>blogs created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>{user.name}</td>
-              <td>{user.blogs.length}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </>
-  )
-}
-
-const App = () => {
-  const user = useUserContext()[0]
-
-  return (
     <Router>
       <Notification />
       <Header />
       <Routes>
-        <Route path="/users" element={<Users />} />
+        <Route path="/users/:id" element={<User users={users} />} />
+        <Route path="/users" element={<Users users={users} />} />
         <Route path="/login" element={<Login />} />
         <Route path="/" element={user ? <Home /> : <Navigate replace to="/login" />} />
       </Routes>
