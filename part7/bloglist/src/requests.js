@@ -19,17 +19,17 @@ export const createBlog = (newBlog) => {
   return axios.post(baseUrl, newBlog, config).then((response) => response.data)
 }
 
-export const updateBlog = (blogId, newBlog) => {
+export const updateBlog = (newBlog) => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   }
 
-  return axios.put(`${baseUrl}/${blogId}`, newBlog, config).then((response) => response.data)
+  return axios.put(`${baseUrl}/${newBlog.id}`, newBlog, config).then((response) => response.data)
 }
 
-export const removeBlog = (blogId) => {
+export const deleteBlog = (blogId) => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,

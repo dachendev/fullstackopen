@@ -4,10 +4,9 @@ import LoginForm from './components/LoginForm'
 import NewBlogForm from './components/NewBlogForm'
 import Toggleable from './components/Toggleable'
 import { useNotificationContext } from './NotificationContext'
-import blogService from './services/blogs'
 import loginService from './services/login'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getBlogs, createBlog, updateBlog, removeBlog, setToken } from './requests'
+import { getBlogs, createBlog, updateBlog, deleteBlog, setToken } from './requests'
 
 const Notification = () => {
   const notification = useNotificationContext()[0]
@@ -28,7 +27,6 @@ const Notification = () => {
 
 const App = () => {
   const queryClient = useQueryClient()
-  const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
   const toggleableRef = useRef()
   const notificationDispatch = useNotificationContext()[1]
@@ -44,6 +42,27 @@ const App = () => {
     onSuccess: (newBlog) => {
       const blogs = queryClient.getQueryData(['blogs'])
       queryClient.setQueryData(['blogs'], blogs.concat(newBlog))
+    },
+  })
+
+  const updateBlogMutation = useMutation({
+    mutationFn: updateBlog,
+    onSuccess: (newBlog) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      const nextBlogs = blogs.map((p) => {
+        if (p.id === newBlog.id) {
+          return newBlog
+        }
+        return p
+      })
+      queryClient.setQueryData(['blogs'], nextBlogs)
+    },
+  })
+
+  const deleteBlogMutation = useMutation({
+    mutationFn: deleteBlog,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['blogs'])
     },
   })
 
@@ -83,23 +102,24 @@ const App = () => {
   const addBlog = async (newBlog) => {
     console.log('creating new blog', newBlog)
 
-    try {
-      newBlogMutation.mutate(newBlog)
-
-      toggleableRef.current.toggleVisibility()
-
-      notificationDispatch({
-        type: 'notification/set',
-        payload: `a new blog ${newBlog.title} by ${newBlog.author} added`,
-      })
-      setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
-    } catch (error) {
-      notificationDispatch({
-        type: 'notification/set',
-        payload: error.response.data.error,
-      })
-      setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
-    }
+    newBlogMutation.mutate(newBlog, {
+      onSuccess: (blog) => {
+        notificationDispatch({
+          type: 'notification/set',
+          payload: `a new blog ${blog.title} by ${blog.author} added`,
+        })
+        setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
+        // close toggleable
+        toggleableRef.current.toggleVisibility()
+      },
+      onError: (error) => {
+        notificationDispatch({
+          type: 'notification/set',
+          payload: error.response.data.error,
+        })
+        setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
+      },
+    })
   }
 
   const cancelAddBlog = () => {
@@ -110,47 +130,42 @@ const App = () => {
   const updateLikes = async (blog) => {
     console.log('like button clicked')
 
-    const newObject = {
+    const newBlog = {
       ...blog,
       likes: blog.likes + 1,
       user: blog.user.id,
     }
 
-    try {
-      const updatedBlog = await blogService.update(blog.id, newObject)
-      const nextBlogs = blogs.map((o) => (o.id === updatedBlog.id ? updatedBlog : o))
-      setBlogs(nextBlogs)
-    } catch (error) {
-      console.log(error)
-      notificationDispatch({
-        type: 'notification/set',
-        payload: error.response.data.error,
-      })
-      setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
-    }
+    updateBlogMutation.mutate(newBlog, {
+      onError: (error) => {
+        notificationDispatch({
+          type: 'notification/set',
+          payload: error.response.data.error,
+        })
+        setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
+      },
+    })
   }
 
   const removeBlog = async (id) => {
     console.log('removing blog')
 
-    try {
-      await blogService.remove(id)
-
-      const nextBlogs = blogs.filter((o) => o.id !== id)
-      setBlogs(nextBlogs)
-
-      notificationDispatch({
-        type: 'notification/set',
-        payload: 'Removed blog successfuly',
-      })
-      setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
-    } catch (error) {
-      notificationDispatch({
-        type: 'notification/set',
-        payload: error.response.data.error,
-      })
-      setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
-    }
+    deleteBlogMutation.mutate(id, {
+      onSuccess: () => {
+        notificationDispatch({
+          type: 'notification/set',
+          payload: 'Removed blog successfuly',
+        })
+        setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
+      },
+      onError: (error) => {
+        notificationDispatch({
+          type: 'notification/set',
+          payload: error.response.data.error,
+        })
+        setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
+      },
+    })
   }
 
   if (user === null) {
