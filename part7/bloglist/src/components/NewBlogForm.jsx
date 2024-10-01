@@ -1,42 +1,83 @@
-import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRef } from 'react'
+import { useNotificationContext } from '../NotificationContext'
+import { createBlog } from '../requests'
+import Toggleable from './Toggleable'
+import { useField } from '../hooks'
 
-const NewBlogForm = ({ addBlog, cancelAddBlog }) => {
-  const [newTitle, setNewTitle] = useState('')
-  const [newAuthor, setNewAuthor] = useState('')
-  const [newUrl, setNewUrl] = useState('')
+const NewBlogForm = () => {
+  const toggleableRef = useRef()
+  const queryClient = useQueryClient()
+  const notificationDispatch = useNotificationContext()[1]
+  const [titleField, setTitle] = useField('text')
+  const [authorField, setAuthor] = useField('text')
+  const [urlField, setUrl] = useField('text')
 
-  const handleSubmit = (event) => {
+  const newBlogMutation = useMutation({
+    mutationFn: createBlog,
+    onSuccess: (newBlog) => {
+      const blogs = queryClient.getQueryData(['blogs'])
+      queryClient.setQueryData(['blogs'], blogs.concat(newBlog))
+    },
+  })
+
+  const addBlog = (event) => {
     event.preventDefault()
 
-    const blogObject = {
-      title: newTitle,
-      author: newAuthor,
-      url: newUrl
+    const newBlog = {
+      title: titleField.value,
+      author: authorField.value,
+      url: urlField.value,
     }
 
-    addBlog(blogObject)
+    console.log('creating new blog', newBlog)
 
-    setNewTitle('')
-    setNewAuthor('')
-    setNewUrl('')
+    newBlogMutation.mutate(newBlog, {
+      onSuccess: (blog) => {
+        notificationDispatch({
+          type: 'notification/set',
+          payload: `a new blog ${blog.title} by ${blog.author} added`,
+        })
+        setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
+        // cleanup
+        setTitle('')
+        setAuthor('')
+        setUrl('')
+        toggleableRef.current.toggleVisibility()
+      },
+      onError: (error) => {
+        notificationDispatch({
+          type: 'notification/set',
+          payload: error.response.data.error,
+        })
+        setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
+      },
+    })
   }
 
-  const handleCancel = () => cancelAddBlog()
+  const cancelAddBlog = () => {
+    console.log('cancel add blog')
+    toggleableRef.current.toggleVisibility()
+  }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        title: <input data-testid="title" name="title" value={newTitle} onChange={e => setNewTitle(e.target.value)} />
-      </div>
-      <div>
-        author: <input data-testid="author" name="author" value={newAuthor} onChange={e => setNewAuthor(e.target.value)} />
-      </div>
-      <div>
-        url: <input data-testid="url" name="url" value={newUrl} onChange={e => setNewUrl(e.target.value)} />
-      </div>
-      <button type="submit">create</button>
-      <button type="button" onClick={handleCancel}>cancel</button>
-    </form>
+    <Toggleable buttonLabel="new blog" ref={toggleableRef}>
+      <form onSubmit={addBlog}>
+        <div>
+          title: <input data-testid="title" {...titleField} />
+        </div>
+        <div>
+          author: <input data-testid="author" {...authorField} />
+        </div>
+        <div>
+          url: <input data-testid="url" {...urlField} />
+        </div>
+        <button type="submit">create</button>
+        <button type="button" onClick={cancelAddBlog}>
+          cancel
+        </button>
+      </form>
+    </Toggleable>
   )
 }
 
