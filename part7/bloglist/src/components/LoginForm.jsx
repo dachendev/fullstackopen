@@ -2,25 +2,20 @@ import { useNotificationContext } from '../contexts/NotificationContext'
 import loginService from '../services/login'
 import { useUserContext } from '../contexts/UserContext'
 import { useField } from '../hooks'
+import { useNavigate } from 'react-router-dom'
 
 const LoginForm = () => {
-  const [usernameField, setUsername] = useField('text')
-  const [passwordField, setPassword] = useField('password')
+  const [usernameField] = useField('text')
+  const [passwordField] = useField('password')
   const userDispatch = useUserContext()[1]
   const notificationDispatch = useNotificationContext()[1]
+  const navigate = useNavigate()
 
-  const onLogin = async (event) => {
-    event.preventDefault()
-
-    const loginObj = {
-      username: usernameField.value,
-      password: passwordField.value,
-    }
-
-    console.log('logging in with', loginObj)
+  const onLogin = async ({ username, password }) => {
+    console.log('logging in with', username, password)
 
     try {
-      const user = await loginService.login(loginObj)
+      const user = await loginService.login({ username, password })
       userDispatch({ type: 'user/set', payload: user })
     } catch (error) {
       notificationDispatch({
@@ -29,14 +24,22 @@ const LoginForm = () => {
       })
       setTimeout(() => notificationDispatch({ type: 'notification/reset' }), 5000)
     }
+  }
 
-    // cleanup
-    setUsername('')
-    setPassword('')
+  const onSubmit = async (event) => {
+    event.preventDefault()
+
+    const loginObj = {
+      username: usernameField.value,
+      password: passwordField.value,
+    }
+
+    await onLogin(loginObj)
+    navigate('/')
   }
 
   return (
-    <form onSubmit={onLogin}>
+    <form onSubmit={onSubmit}>
       <div>
         username
         <input data-testid="username" {...usernameField} />

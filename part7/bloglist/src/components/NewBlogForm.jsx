@@ -1,9 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef } from 'react'
 import { useNotificationContext } from '../contexts/NotificationContext'
-import { createBlog } from '../requests'
+import { useApiService, useField } from '../hooks'
 import Toggleable from './Toggleable'
-import { useField } from '../hooks'
 
 const NewBlogForm = () => {
   const toggleableRef = useRef()
@@ -12,9 +11,10 @@ const NewBlogForm = () => {
   const [titleField, setTitle] = useField('text')
   const [authorField, setAuthor] = useField('text')
   const [urlField, setUrl] = useField('text')
+  const blogService = useApiService('/api/blogs')
 
   const newBlogMutation = useMutation({
-    mutationFn: createBlog,
+    mutationFn: blogService.create,
     onSuccess: (newBlog) => {
       const blogs = queryClient.getQueryData(['blogs'])
       queryClient.setQueryData(['blogs'], blogs.concat(newBlog))

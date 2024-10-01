@@ -1,22 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNotificationContext } from '../contexts/NotificationContext'
-import { deleteBlog, getBlogs, updateBlog } from '../requests'
+// import { deleteBlog, getBlogs, updateBlog } from '../requests/blogRequests'
 import { useUserContext } from '../contexts/UserContext'
+import { useApiService } from '../hooks'
 import Blog from './Blog'
 
 const BlogList = () => {
   const queryClient = useQueryClient()
   const notificationDispatch = useNotificationContext()[1]
   const user = useUserContext()[0]
+  const blogService = useApiService('/api/blogs')
 
   const result = useQuery({
     queryKey: ['blogs'],
-    queryFn: getBlogs,
+    queryFn: blogService.getAll,
     refetchOnWindowFocus: false,
   })
 
   const updateBlogMutation = useMutation({
-    mutationFn: updateBlog,
+    mutationFn: blogService.update,
     onSuccess: (newBlog) => {
       const blogs = queryClient.getQueryData(['blogs'])
       const nextBlogs = blogs.map((p) => {
@@ -30,7 +32,7 @@ const BlogList = () => {
   })
 
   const deleteBlogMutation = useMutation({
-    mutationFn: deleteBlog,
+    mutationFn: blogService.removeById,
     onSuccess: () => {
       queryClient.invalidateQueries(['blogs'])
     },

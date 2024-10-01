@@ -6,7 +6,7 @@ const Blog = ({ blog, updateLikes, isCreator, removeBlog }) => {
     paddingLeft: 2,
     border: 'solid',
     borderWidth: 1,
-    marginBottom: 5
+    marginBottom: 5,
   }
 
   const handleUpdateLikes = () => {
@@ -24,7 +24,9 @@ const Blog = ({ blog, updateLikes, isCreator, removeBlog }) => {
     <div className="blog" style={blogStyles}>
       <Toggleable text={`${blog.title} ${blog.author}`} buttonLabel={'show'} buttonLabelCollapse={'hide'}>
         <div>{blog.url}</div>
-        <div>likes {blog.likes} <button onClick={handleUpdateLikes}>like</button></div>
+        <div>
+          likes {blog.likes} <button onClick={handleUpdateLikes}>like</button>
+        </div>
         <div>{blog.user.name}</div>
         {isCreator ? (
           <div>
