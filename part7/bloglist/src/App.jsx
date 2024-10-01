@@ -12,9 +12,7 @@ const Notification = ({ message, type = 'error' }) => {
     return null
   }
 
-  return (
-    <div className={type}>{message}</div>
-  )
+  return <div className={type}>{message}</div>
 }
 
 const App = () => {
@@ -25,7 +23,7 @@ const App = () => {
   const toggleableRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then(blogs => setBlogs(blogs))
+    blogService.getAll().then((blogs) => setBlogs(blogs))
   }, [])
 
   useEffect(() => {
@@ -88,12 +86,14 @@ const App = () => {
     const newObject = {
       ...blog,
       likes: blog.likes + 1,
-      user: blog.user.id
+      user: blog.user.id,
     }
 
     try {
       const updatedBlog = await blogService.update(blog.id, newObject)
-      const nextBlogs = blogs.map(o => (o.id === updatedBlog.id ? updatedBlog : o))
+      const nextBlogs = blogs.map((o) =>
+        o.id === updatedBlog.id ? updatedBlog : o,
+      )
       setBlogs(nextBlogs)
     } catch (error) {
       console.log(error)
@@ -108,7 +108,7 @@ const App = () => {
     try {
       await blogService.remove(id)
 
-      const nextBlogs = blogs.filter(o => o.id !== id)
+      const nextBlogs = blogs.filter((o) => o.id !== id)
       setBlogs(nextBlogs)
 
       setSuccessMessage('Removed blog successfuly')
@@ -137,11 +137,21 @@ const App = () => {
       <Notification message={errorMessage} />
       <Notification type="success" message={successMessage} />
       <h2>blogs</h2>
-      <p>{user.name} logged in <button onClick={logout}>logout</button></p>
+      <p>
+        {user.name} logged in <button onClick={logout}>logout</button>
+      </p>
       <Toggleable buttonLabel="new blog" ref={toggleableRef}>
         <NewBlogForm addBlog={addBlog} cancelAddBlog={cancelAddBlog} />
       </Toggleable>
-      {sortedBlogs.map(blog => <Blog key={blog.id} blog={blog} updateLikes={updateLikes} isCreator={user.username === blog.user.username} removeBlog={removeBlog} />)}
+      {sortedBlogs.map((blog) => (
+        <Blog
+          key={blog.id}
+          blog={blog}
+          updateLikes={updateLikes}
+          isCreator={user.username === blog.user.username}
+          removeBlog={removeBlog}
+        />
+      ))}
     </>
   )
 }

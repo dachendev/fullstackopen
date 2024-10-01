@@ -10,7 +10,8 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
-    'plugin:vitest-globals/recommended'
+    'plugin:vitest-globals/recommended',
+    'prettier'
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
@@ -30,9 +31,9 @@ module.exports = {
     '@stylistic/quotes': ['error', 'single'],
     '@stylistic/semi': ['error', 'never'],
     'eqeqeq': 'error',
-    'no-trailing-spaces': 'error',
-    'object-curly-spacing': ['error', 'always'],
-    'arrow-spacing': ['error', { 'before': true, 'after': true }],
+    // 'no-trailing-spaces': 'error',
+    // 'object-curly-spacing': ['error', 'always'],
+    // 'arrow-spacing': ['error', { 'before': true, 'after': true }],
     'no-console': 'off'
   },
 }
