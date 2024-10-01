@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef } from 'react'
-import { useNotificationContext } from '../NotificationContext'
+import { useNotificationContext } from '../contexts/NotificationContext'
 import { createBlog } from '../requests'
 import Toggleable from './Toggleable'
 import { useField } from '../hooks'

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNotificationContext } from '../NotificationContext'
+import { useNotificationContext } from '../contexts/NotificationContext'
 import { deleteBlog, getBlogs, updateBlog } from '../requests'
-import { useUserContext } from '../UserContext'
+import { useUserContext } from '../contexts/UserContext'
 import Blog from './Blog'
 
 const BlogList = () => {

@@ -1,6 +1,6 @@
-import { useNotificationContext } from '../NotificationContext'
+import { useNotificationContext } from '../contexts/NotificationContext'
 import loginService from '../services/login'
-import { useUserContext } from '../UserContext'
+import { useUserContext } from '../contexts/UserContext'
 import { useField } from '../hooks'
 
 const LoginForm = () => {

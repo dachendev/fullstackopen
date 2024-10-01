@@ -1,6 +1,6 @@
 import Home from './components/Home'
 import Login from './components/Login'
-import { useUserContext } from './UserContext'
+import { useUserContext } from './contexts/UserContext'
 
 const App = () => {
   const user = useUserContext()[0]

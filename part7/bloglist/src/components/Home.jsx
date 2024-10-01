@@ -1,4 +1,4 @@
-import { useUserContext } from '../UserContext'
+import { useUserContext } from '../contexts/UserContext'
 import BlogList from './BlogList'
 import NewBlogForm from './NewBlogForm'
 import Notification from './Notification'

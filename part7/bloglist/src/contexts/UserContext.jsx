@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, useEffect } from 'react'
-import { setToken } from './requests'
+import { setToken } from '../requests'
 
 const userReducer = (state, action) => {
   if (action.type === 'user/set') {
