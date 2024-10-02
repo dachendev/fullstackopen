@@ -103,6 +103,15 @@ const UserPage = () => {
   const users = usersQuery.data
   const user = users.find((p) => p.id === id)
 
+  if (!user) {
+    return (
+      <>
+        <Header />
+        <div>user not found</div>
+      </>
+    )
+  }
+
   return (
     <>
       <Header />
@@ -133,6 +142,15 @@ const BlogPage = () => {
   }
 
   const blog = blogsQuery.data.find((o) => o.id === id)
+
+  if (!blog) {
+    return (
+      <>
+        <Header />
+        <div>blog not found</div>
+      </>
+    )
+  }
 
   return (
     <div>
