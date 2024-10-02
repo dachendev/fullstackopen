@@ -1,25 +1,17 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef } from 'react'
+import { useCreateBlogMutation } from '../api/blogHooks'
 import { useNotificationContext } from '../contexts/NotificationContext'
-import { useApiService, useField } from '../hooks'
+import useField from '../hooks/useField'
 import Toggleable from './Toggleable'
 
 const NewBlogForm = () => {
   const toggleableRef = useRef()
-  const queryClient = useQueryClient()
   const notificationDispatch = useNotificationContext()[1]
   const [titleField, setTitle] = useField('text')
   const [authorField, setAuthor] = useField('text')
   const [urlField, setUrl] = useField('text')
-  const blogService = useApiService('/api/blogs')
 
-  const newBlogMutation = useMutation({
-    mutationFn: blogService.create,
-    onSuccess: (newBlog) => {
-      const blogs = queryClient.getQueryData(['blogs'])
-      queryClient.setQueryData(['blogs'], blogs.concat(newBlog))
-    },
-  })
+  const createBlogMutation = useCreateBlogMutation()
 
   const addBlog = (event) => {
     event.preventDefault()
@@ -32,7 +24,7 @@ const NewBlogForm = () => {
 
     console.log('creating new blog', newBlog)
 
-    newBlogMutation.mutate(newBlog, {
+    createBlogMutation.mutate(newBlog, {
       onSuccess: (blog) => {
         notificationDispatch({
           type: 'notification/set',

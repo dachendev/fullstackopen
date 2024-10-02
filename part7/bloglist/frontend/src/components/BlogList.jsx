@@ -1,42 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNotificationContext } from '../contexts/NotificationContext'
 // import { deleteBlog, getBlogs, updateBlog } from '../requests/blogRequests'
+import { useRemoveBlogMutation, useBlogsQuery, useUpdateBlogMutation } from '../api/blogHooks'
 import { useUserContext } from '../contexts/UserContext'
-import { useApiService } from '../hooks'
 import BlogListItem from './BlogListItem'
 
 const BlogList = () => {
-  const queryClient = useQueryClient()
   const notificationDispatch = useNotificationContext()[1]
   const user = useUserContext()[0]
-  const blogService = useApiService('/api/blogs')
 
-  const result = useQuery({
-    queryKey: ['blogs'],
-    queryFn: blogService.getAll,
-    refetchOnWindowFocus: false,
-  })
-
-  const updateBlogMutation = useMutation({
-    mutationFn: blogService.update,
-    onSuccess: (newBlog) => {
-      const blogs = queryClient.getQueryData(['blogs'])
-      const nextBlogs = blogs.map((p) => {
-        if (p.id === newBlog.id) {
-          return newBlog
-        }
-        return p
-      })
-      queryClient.setQueryData(['blogs'], nextBlogs)
-    },
-  })
-
-  const deleteBlogMutation = useMutation({
-    mutationFn: blogService.removeById,
-    onSuccess: () => {
-      queryClient.invalidateQueries(['blogs'])
-    },
-  })
+  const blogsQuery = useBlogsQuery()
+  const updateBlogMutation = useUpdateBlogMutation()
+  const deleteBlogMutation = useRemoveBlogMutation()
 
   const updateLikes = async (blog) => {
     console.log('like button clicked')
@@ -79,11 +53,11 @@ const BlogList = () => {
     })
   }
 
-  if (result.isLoading) {
+  if (blogsQuery.isLoading) {
     return <div>Loading data...</div>
   }
 
-  const sortedBlogs = result.data.sort((a, b) => b.likes - a.likes)
+  const sortedBlogs = blogsQuery.data.sort((a, b) => b.likes - a.likes)
 
   return (
     <div>

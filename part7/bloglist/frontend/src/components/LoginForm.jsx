@@ -1,8 +1,8 @@
 import { useNotificationContext } from '../contexts/NotificationContext'
-import loginService from '../services/login'
 import { useUserContext } from '../contexts/UserContext'
-import { useField } from '../hooks'
+import useField from '../hooks/useField'
 import { useNavigate } from 'react-router-dom'
+import { login } from '../api/authService'
 
 const LoginForm = () => {
   const [usernameField] = useField('text')
@@ -15,7 +15,7 @@ const LoginForm = () => {
     console.log('logging in with', username, password)
 
     try {
-      const user = await loginService.login({ username, password })
+      const user = await login({ username, password })
       userDispatch({ type: 'user/set', payload: user })
     } catch (error) {
       notificationDispatch({
