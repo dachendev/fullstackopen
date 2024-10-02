@@ -3,6 +3,7 @@ import { useUserContext } from '../contexts/UserContext'
 import useField from '../hooks/useField'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../api/authService'
+import { Button } from '@material-tailwind/react'
 
 const LoginForm = () => {
   const [usernameField] = useField('text')
@@ -48,7 +49,7 @@ const LoginForm = () => {
         password
         <input data-testid="password" {...passwordField} />
       </div>
-      <button type="submit">login</button>
+      <Button type="submit">login</Button>
     </form>
   )
 }
