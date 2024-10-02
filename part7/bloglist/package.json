@@ -1,0 +1,8 @@
+{
+  "name": "bloglist",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}
