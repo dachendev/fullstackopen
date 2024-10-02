@@ -29,6 +29,8 @@ export const useApiService = (baseUrl) => {
 
   const getAll = () => axios.get(baseUrl, config).then((response) => response.data)
 
+  const getById = (id) => axios.get(`${baseUrl}/${id}`, config).then((response) => response.data)
+
   const create = (newObject) => axios.post(baseUrl, newObject, config).then((response) => response.data)
 
   const update = (newObject) =>
@@ -38,6 +40,7 @@ export const useApiService = (baseUrl) => {
 
   return {
     getAll,
+    getById,
     create,
     update,
     removeById,

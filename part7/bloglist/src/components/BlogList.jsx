@@ -3,7 +3,7 @@ import { useNotificationContext } from '../contexts/NotificationContext'
 // import { deleteBlog, getBlogs, updateBlog } from '../requests/blogRequests'
 import { useUserContext } from '../contexts/UserContext'
 import { useApiService } from '../hooks'
-import Blog from './Blog'
+import BlogListItem from './BlogListItem'
 
 const BlogList = () => {
   const queryClient = useQueryClient()
@@ -88,7 +88,7 @@ const BlogList = () => {
   return (
     <div>
       {sortedBlogs.map((blog) => (
-        <Blog
+        <BlogListItem
           key={blog.id}
           blog={blog}
           updateLikes={updateLikes}

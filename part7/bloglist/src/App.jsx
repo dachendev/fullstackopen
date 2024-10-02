@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate, Route, BrowserRouter as Router, Routes, useParams } from 'react-router-dom'
+import { Link, Navigate, Route, BrowserRouter as Router, Routes, useNavigate, useParams } from 'react-router-dom'
 import BlogList from './components/BlogList'
 import LoginForm from './components/LoginForm'
 import NewBlogForm from './components/NewBlogForm'
 import Notification from './components/Notification'
 import { useUserContext } from './contexts/UserContext'
 import { useApiService } from './hooks'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 const Login = () => (
   <>
@@ -99,10 +100,91 @@ const User = ({ users }) => {
   )
 }
 
+const Blog = () => {
+  const blogService = useApiService('/api/blogs')
+  const id = useParams().id
+  const activeUser = useUserContext()[0]
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+
+  // using react-query to demo knowledge,
+  // I realize there's better ways to approach this...
+
+  const result = useQuery({
+    queryKey: ['blogs'],
+    queryFn: blogService.getAll,
+    refetchOnWindowFocus: false,
+  })
+
+  const updateBlogMutation = useMutation({
+    mutationFn: blogService.update,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['blogs'])
+    },
+  })
+
+  const removeBlogMutation = useMutation({
+    mutationFn: blogService.removeById,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['blogs'])
+    },
+  })
+
+  if (result.isLoading) {
+    return <div>Loading data...</div>
+  }
+
+  const blog = result.data.find((p) => p.id === id)
+
+  const handleLike = () => {
+    console.log('like')
+
+    const newBlog = {
+      ...blog,
+      likes: blog.likes + 1,
+      user: blog.user.id,
+    }
+
+    updateBlogMutation.mutate(newBlog)
+  }
+
+  const handleRemove = () => {
+    console.log('remove')
+
+    removeBlogMutation.mutate(blog.id)
+    navigate('/')
+  }
+
+  return (
+    <div>
+      <h2>
+        {blog.title} {blog.author}
+      </h2>
+      <div>
+        <a href={blog.url}>{blog.url}</a>
+      </div>
+      <div>
+        {blog.likes} likes{' '}
+        <button type="button" onClick={handleLike}>
+          like
+        </button>
+      </div>
+      <div>added by {blog.user.name}</div>
+      {blog.user.username === activeUser.username ? (
+        <div>
+          <button type="button" onClick={handleRemove}>
+            remove
+          </button>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 const App = () => {
-  const user = useUserContext()[0]
   const [users, setUsers] = useState([])
   const userService = useApiService('/api/users')
+  const activeUser = useUserContext()[0]
 
   useEffect(() => {
     userService.getAll().then((users) => setUsers(users))
@@ -116,7 +198,8 @@ const App = () => {
         <Route path="/users/:id" element={<User users={users} />} />
         <Route path="/users" element={<Users users={users} />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={user ? <Home /> : <Navigate replace to="/login" />} />
+        <Route path="/blogs/:id" element={<Blog />} />
+        <Route path="/" element={activeUser ? <Home /> : <Navigate replace to="/login" />} />
       </Routes>
     </Router>
   )
