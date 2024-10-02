@@ -15,6 +15,31 @@ const Login = () => (
   </>
 )
 
+const Navbar = ({ user, onLogout }) => {
+  const style = {
+    background: 'lightgray',
+    padding: '0.5rem',
+  }
+
+  const linkStyle = {
+    padding: '0.5rem',
+  }
+
+  return (
+    <div style={style}>
+      <Link to="/" style={linkStyle}>
+        blogs
+      </Link>
+      <Link to="/users" style={linkStyle}>
+        users
+      </Link>
+      <span>
+        {user.name} logged in <button onClick={onLogout}>logout</button>
+      </span>
+    </div>
+  )
+}
+
 const Header = () => {
   const [user, userDispatch] = useUserContext()
 
@@ -26,24 +51,10 @@ const Header = () => {
     userDispatch({ type: 'user/reset' })
   }
 
-  const linkStyle = {
-    padding: '0.5rem',
-  }
-
   return (
     <div>
-      <div>
-        <Link to="/" style={linkStyle}>
-          blogs
-        </Link>
-        <Link to="/users" style={linkStyle}>
-          users
-        </Link>
-      </div>
-      <h2>blogs</h2>
-      <p>
-        {user.name} logged in <button onClick={logout}>logout</button>
-      </p>
+      <Navbar user={user} onLogout={logout} />
+      <h2>blog app</h2>
     </div>
   )
 }
