@@ -32,22 +32,32 @@ const Blog = ({ blog, onRemove }) => {
         {blog.title} {blog.author}
       </h2>
       <div>
-        <a href={blog.url}>{blog.url}</a>
-      </div>
-      <div>
-        {blog.likes} likes{' '}
-        <button type="button" onClick={handleLike}>
-          like
-        </button>
-      </div>
-      <div>added by {blog.user.name}</div>
-      {userIsCreator ? (
         <div>
-          <button type="button" onClick={handleRemove}>
-            remove
+          <a href={blog.url}>{blog.url}</a>
+        </div>
+        <div>
+          {blog.likes} likes{' '}
+          <button type="button" onClick={handleLike}>
+            like
           </button>
         </div>
-      ) : null}
+        <div>added by {blog.user.name}</div>
+        {userIsCreator ? (
+          <div>
+            <button type="button" onClick={handleRemove}>
+              remove
+            </button>
+          </div>
+        ) : null}
+      </div>
+      <div>
+        <h3>comments</h3>
+        <ul>
+          {blog.comments.map((comment) => (
+            <li key={comment.id}>{comment.content}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }

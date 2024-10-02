@@ -2,6 +2,20 @@ const usersRouter = require('express').Router()
 const User = require('../models/user.js')
 const bcrypt = require('bcrypt')
 
+// get logged in user
+usersRouter.get('/me', async (request, response) => {
+  const user = request.user
+
+  if (!user) {
+    response
+      .status(401) // unauthorized
+      .json({ error: 'invalid user' })
+    return
+  }
+
+  response.json(user)
+})
+
 usersRouter.get('/', async (req, res) => {
   const users = await User.find({}).populate('blogs')
   res.json(users)
@@ -24,7 +38,7 @@ usersRouter.post('/', async (req, res) => {
   const user = new User({
     username: body.username,
     name: body.name,
-    passwordHash
+    passwordHash,
   })
 
   const savedUser = await user.save()

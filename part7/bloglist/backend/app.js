@@ -15,11 +15,12 @@ mongoose.connect(config.MONGODB_URI)
 
 app.use(cors())
 app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
 app.use(tokenExtractor())
 
 app.use('/api/login', loginRouter)
 app.use('/api/blogs', userExtractor(), blogsRouter)
-app.use('/api/users', usersRouter)
+app.use('/api/users', userExtractor(), usersRouter)
 
 if (process.env.NODE_ENV === 'test') {
   const testRoutes = require('./controllers/test')
@@ -50,4 +51,4 @@ const errorHandler = (error, req, res, next) => {
 
 app.use(errorHandler)
 
-module.exports = app;
+module.exports = app
