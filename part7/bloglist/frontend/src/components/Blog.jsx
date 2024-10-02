@@ -1,5 +1,6 @@
 import { useRemoveBlogMutation, useUpdateBlogMutation } from '../api/blogHooks'
 import { useUserValue } from '../contexts/UserContext'
+import AddCommentForm from './AddCommentForm'
 
 const Blog = ({ blog, onRemove }) => {
   const updateBlogMutation = useUpdateBlogMutation()
@@ -52,6 +53,7 @@ const Blog = ({ blog, onRemove }) => {
       </div>
       <div>
         <h3>comments</h3>
+        <AddCommentForm blog={blog} />
         <ul>
           {blog.comments.map((comment) => (
             <li key={comment.id}>{comment.content}</li>

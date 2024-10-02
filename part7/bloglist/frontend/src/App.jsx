@@ -1,5 +1,5 @@
+import { useQuery } from '@tanstack/react-query'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useNavigate, useParams } from 'react-router-dom'
-import { useBlogsQuery } from './api/blogHooks'
 import { useGetUsersQuery } from './api/userHooks'
 import './App.css'
 import Blog from './components/Blog'
@@ -7,7 +7,8 @@ import BlogList from './components/BlogList'
 import LoginForm from './components/LoginForm'
 import NewBlogForm from './components/NewBlogForm'
 import Notification from './components/Notification'
-import { useUserContext } from './contexts/UserContext'
+import { useUserContext, useUserValue } from './contexts/UserContext'
+import useResourceService from './hooks/useResourceService'
 
 const Navbar = () => {
   const [user, userDispatch] = useUserContext()
@@ -47,13 +48,15 @@ const LoginPage = () => (
   </>
 )
 
-const HomePage = () => (
-  <>
-    <Header />
-    <NewBlogForm />
-    <BlogList />
-  </>
-)
+const HomePage = () => {
+  return (
+    <>
+      <Header />
+      <NewBlogForm />
+      <BlogList />
+    </>
+  )
+}
 
 const UsersPage = () => {
   const usersQuery = useGetUsersQuery()
@@ -130,18 +133,23 @@ const UserPage = () => {
 
 const BlogPage = () => {
   const id = useParams().id
-  const blogsQuery = useBlogsQuery()
+  const { get } = useResourceService('/api/blogs')
   const navigate = useNavigate()
+
+  const blogQuery = useQuery({
+    queryKey: ['blogs', id],
+    queryFn: () => get(id),
+  })
 
   const onRemove = () => {
     navigate('/')
   }
 
-  if (blogsQuery.isLoading) {
+  if (blogQuery.isLoading) {
     return <div>Loading data...</div>
   }
 
-  const blog = blogsQuery.data.find((o) => o.id === id)
+  const blog = blogQuery.data
 
   if (!blog) {
     return (
@@ -160,18 +168,26 @@ const BlogPage = () => {
   )
 }
 
+const AppViews = () => {
+  return (
+    <Routes>
+      <Route path="/blogs/:id" element={<BlogPage />} />
+      <Route path="/users/:id" element={<UserPage />} />
+      <Route path="/users" element={<UsersPage />} />
+      <Route path="/" element={<HomePage />} />
+    </Routes>
+  )
+}
+
 const App = () => {
-  const activeUser = useUserContext()[0]
+  const user = useUserValue()
 
   return (
     <Router>
       <Notification />
       <Routes>
-        <Route path="/blogs/:id" element={<BlogPage />} />
-        <Route path="/users/:id" element={<UserPage />} />
-        <Route path="/users" element={<UsersPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={activeUser ? <HomePage /> : <Navigate replace to="/login" />} />
+        <Route path="/*" element={user ? <AppViews /> : <Navigate replace to="/login" />} />
       </Routes>
     </Router>
   )
