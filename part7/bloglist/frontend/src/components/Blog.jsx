@@ -24,9 +24,12 @@ const Blog = ({ blog, onRemove }) => {
   }
 
   const handleRemove = () => {
-    console.log('remove')
-    removeBlogMutation.mutate(blog.id)
-    onRemove()
+    const ok = window.confirm(`Are you sure you want to remove ${blog.title}? This action cannot be undone.`)
+    if (ok) {
+      console.log('remove')
+      removeBlogMutation.mutate(blog.id)
+      onRemove()
+    }
   }
 
   return (
