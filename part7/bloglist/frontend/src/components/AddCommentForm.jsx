@@ -1,3 +1,4 @@
+import { Button, Input } from '@material-tailwind/react'
 import { useAddCommentMutation } from '../api/blogHooks'
 import { useNotificationDispatch } from '../contexts/NotificationContext'
 import useField from '../hooks/useField'
@@ -38,8 +39,12 @@ const AddCommentForm = ({ blog }) => {
   return (
     <div>
       <form onSubmit={addComment}>
-        <input {...commentField} />
-        <button type="submit">add comment</button>
+        <div className="relative flex w-full">
+          <Input {...commentField} className="pr-20" containerProps={{ className: 'min-w-0' }} />
+          <Button size="sm" className="!absolute right-1 top-1 rounded" type="submit">
+            add comment
+          </Button>
+        </div>
       </form>
     </div>
   )

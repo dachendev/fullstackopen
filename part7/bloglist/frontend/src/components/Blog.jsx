@@ -1,3 +1,5 @@
+import { Button, Card, CardBody, List, ListItem, Typography } from '@material-tailwind/react'
+import { Link } from 'react-router-dom'
 import { useRemoveBlogMutation, useUpdateBlogMutation } from '../api/blogHooks'
 import { useUserValue } from '../contexts/UserContext'
 import AddCommentForm from './AddCommentForm'
@@ -29,37 +31,55 @@ const Blog = ({ blog, onRemove }) => {
 
   return (
     <div>
-      <h2>
-        {blog.title} {blog.author}
-      </h2>
-      <div>
-        <div>
-          <a href={blog.url}>{blog.url}</a>
-        </div>
-        <div>
-          {blog.likes} likes{' '}
-          <button type="button" onClick={handleLike}>
-            like
-          </button>
-        </div>
-        <div>added by {blog.user.name}</div>
-        {userIsCreator ? (
+      <Card className="mb-3">
+        <CardBody>
+          <Typography variant="h2" className="mb-3">
+            {blog.title} {blog.author}
+          </Typography>
           <div>
-            <button type="button" onClick={handleRemove}>
-              remove
-            </button>
+            <div className="mb-3">
+              <a href={blog.url} target="_blank" rel="noreferrer" className="font-medium text-blue-600 hover:underline">
+                {blog.url}
+              </a>
+            </div>
+            <div className="mb-3">
+              {blog.likes} likes{' '}
+              <Button type="button" onClick={handleLike}>
+                like
+              </Button>
+            </div>
+            <div className="mb-3">
+              added by{' '}
+              <Link to={`/users/${blog.user.id}`} className="font-medium text-blue-600 hover:underline">
+                {blog.user.name}
+              </Link>
+            </div>
+            {userIsCreator ? (
+              <div className="mb-3">
+                <Button type="button" onClick={handleRemove}>
+                  remove
+                </Button>
+              </div>
+            ) : null}
           </div>
-        ) : null}
-      </div>
-      <div>
-        <h3>comments</h3>
-        <AddCommentForm blog={blog} />
-        <ul>
-          {blog.comments.map((comment) => (
-            <li key={comment.id}>{comment.content}</li>
-          ))}
-        </ul>
-      </div>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardBody>
+          <Typography variant="h3" className="mb-3">
+            comments
+          </Typography>
+          <div className="mb-3">
+            <AddCommentForm blog={blog} />
+          </div>
+          <List>
+            {blog.comments.map((comment) => (
+              <ListItem key={comment.id}>{comment.content}</ListItem>
+            ))}
+          </List>
+        </CardBody>
+      </Card>
     </div>
   )
 }

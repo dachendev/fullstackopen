@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const Comment = require('./comment')
+const User = require('./user')
 
 const blogSchema = new mongoose.Schema({
   title: {
@@ -9,6 +11,12 @@ const blogSchema = new mongoose.Schema({
   url: {
     type: String,
     required: true,
+    validate: {
+      validator: (v) => {
+        return /^(https?:\/\/)([a-z0-9\-\.]+)(\.)([a-z]+)(\/.*)?$/i.test(v)
+      },
+      message: (props) => `${props.value} is not a valid url!`,
+    },
   },
   likes: {
     type: Number,
@@ -32,6 +40,12 @@ blogSchema.set('toJSON', {
     delete returnedObj._id
     delete returnedObj.__v
   },
+})
+
+blogSchema.pre('deleteOne', { document: true }, async function (next) {
+  await User.updateById(this.user, { $pull: { blogs: this._id } })
+  await Comment.deleteMany({ _id: { $in: this.comments } })
+  next()
 })
 
 module.exports = mongoose.model('Blog', blogSchema)

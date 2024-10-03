@@ -3,6 +3,7 @@ import { useNotificationContext } from '../contexts/NotificationContext'
 import { useRemoveBlogMutation, useBlogsQuery, useUpdateBlogMutation } from '../api/blogHooks'
 import { useUserContext } from '../contexts/UserContext'
 import BlogListItem from './BlogListItem'
+import { Card, List } from '@material-tailwind/react'
 
 const BlogList = () => {
   const notificationDispatch = useNotificationContext()[1]
@@ -60,17 +61,19 @@ const BlogList = () => {
   const sortedBlogs = blogsQuery.data.sort((a, b) => b.likes - a.likes)
 
   return (
-    <div>
-      {sortedBlogs.map((blog) => (
-        <BlogListItem
-          key={blog.id}
-          blog={blog}
-          updateLikes={updateLikes}
-          isCreator={user.username === blog.user.username}
-          removeBlog={removeBlog}
-        />
-      ))}
-    </div>
+    <Card className="mb-6">
+      <List>
+        {sortedBlogs.map((blog) => (
+          <BlogListItem
+            key={blog.id}
+            blog={blog}
+            updateLikes={updateLikes}
+            isCreator={user.username === blog.user.username}
+            removeBlog={removeBlog}
+          />
+        ))}
+      </List>
+    </Card>
   )
 }
 

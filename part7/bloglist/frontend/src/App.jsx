@@ -1,3 +1,4 @@
+import { Card, CardBody, List, ListItem, Typography } from '@material-tailwind/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, Navigate, Route, BrowserRouter as Router, Routes, useNavigate, useParams } from 'react-router-dom'
 import { useGetUsersQuery } from './api/userHooks'
@@ -5,46 +6,30 @@ import './App.css'
 import Blog from './components/Blog'
 import BlogList from './components/BlogList'
 import LoginForm from './components/LoginForm'
+import NavbarSimple from './components/NavbarSimple'
 import NewBlogForm from './components/NewBlogForm'
 import Notification from './components/Notification'
-import { useUserContext, useUserValue } from './contexts/UserContext'
+import UsersTable from './components/UsersTable'
+import { useUserValue } from './contexts/UserContext'
 import useResourceService from './hooks/useResourceService'
-
-const Navbar = () => {
-  const [user, userDispatch] = useUserContext()
-
-  const handleLogout = () => {
-    userDispatch({ type: 'user/reset' })
-  }
-
-  return (
-    <div className="navbar">
-      <Link to="/" className="navbar__link">
-        blogs
-      </Link>
-      <Link to="/users" className="navbar__link">
-        users
-      </Link>
-      <span>
-        {user.name} logged in <button onClick={handleLogout}>logout</button>
-      </span>
-    </div>
-  )
-}
 
 const Header = () => {
   return (
     <div>
-      <Navbar />
-      <h2>blog app</h2>
+      <NavbarSimple />
+      <Typography variant="h2" className="my-6">
+        blog app
+      </Typography>
     </div>
   )
 }
 
 const LoginPage = () => (
   <>
-    <h2>log in to application</h2>
-    <LoginForm />
+    <Typography variant="h2">log in to application</Typography>
+    <Card color="transparent" shadow={false}>
+      <LoginForm />
+    </Card>
   </>
 )
 
@@ -52,44 +37,23 @@ const HomePage = () => {
   return (
     <>
       <Header />
-      <NewBlogForm />
+      <div className="mb-3">
+        <NewBlogForm />
+      </div>
       <BlogList />
     </>
   )
 }
 
 const UsersPage = () => {
-  const usersQuery = useGetUsersQuery()
-
-  if (usersQuery.isLoading) {
-    return <div>Loading data...</div>
-  }
-
-  const users = usersQuery.data
-
   return (
     <>
       <Header />
-      <h2>Users</h2>
+      <Typography variant="h2" className="mb-4">
+        users
+      </Typography>
       <div>
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>blogs created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>
-                  <Link to={`/users/${user.id}`}>{user.name}</Link>
-                </td>
-                <td>{user.blogs.length}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <UsersTable />
       </div>
     </>
   )
@@ -118,15 +82,28 @@ const UserPage = () => {
   return (
     <>
       <Header />
-      <h2>{user.name}</h2>
-      <h3>added blogs</h3>
-      <div>
-        <ul>
-          {user.blogs.map((blog) => (
-            <li key={blog.id}>{blog.title}</li>
-          ))}
-        </ul>
-      </div>
+      <Card className="mb-3">
+        <CardBody>
+          <Typography variant="h2">{user.name}</Typography>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardBody>
+          <Typography variant="h3" className="mb-3">
+            added blogs
+          </Typography>
+          <List>
+            {user.blogs.map((blog) => (
+              <Link key={blog.id} to={`/blogs/${blog.id}`} className="text-initial">
+                <ListItem>
+                  {blog.title} by {blog.author}
+                </ListItem>
+              </Link>
+            ))}
+          </List>
+        </CardBody>
+      </Card>
     </>
   )
 }
@@ -161,10 +138,10 @@ const BlogPage = () => {
   }
 
   return (
-    <div>
+    <>
       <Header />
       <Blog blog={blog} onRemove={onRemove} />
-    </div>
+    </>
   )
 }
 
@@ -184,11 +161,13 @@ const App = () => {
 
   return (
     <Router>
-      <Notification />
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/*" element={user ? <AppViews /> : <Navigate replace to="/login" />} />
-      </Routes>
+      <div className="container mx-auto">
+        <Notification />
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/*" element={user ? <AppViews /> : <Navigate replace to="/login" />} />
+        </Routes>
+      </div>
     </Router>
   )
 }

@@ -1,3 +1,4 @@
+import { Alert } from '@material-tailwind/react'
 import { useNotificationContext } from '../contexts/NotificationContext'
 
 const Notification = () => {
@@ -7,14 +8,7 @@ const Notification = () => {
     return null
   }
 
-  const style = {
-    padding: '1rem',
-    marginBottom: '1rem',
-    border: '2px solid #000',
-    borderRadius: '0.25rem',
-  }
-
-  return <div style={style}>{notification}</div>
+  return <Alert>{notification}</Alert>
 }
 
 export default Notification

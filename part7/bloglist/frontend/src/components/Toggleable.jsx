@@ -1,3 +1,4 @@
+import { Button } from '@material-tailwind/react'
 import { useState, forwardRef, useImperativeHandle } from 'react'
 
 const Toggleable = forwardRef(({ text, buttonLabel, buttonLabelCollapse = buttonLabel, children }, refs) => {
@@ -7,18 +8,16 @@ const Toggleable = forwardRef(({ text, buttonLabel, buttonLabelCollapse = button
 
   useImperativeHandle(refs, () => {
     return {
-      toggleVisibility
+      toggleVisibility,
     }
   })
 
   return (
     <div>
       <div>
-        {text} <button onClick={toggleVisibility}>{visible ? buttonLabelCollapse : buttonLabel}</button>
+        {text} <Button onClick={toggleVisibility}>{visible ? buttonLabelCollapse : buttonLabel}</Button>
       </div>
-      <div style={visible ? {} : { display: 'none' }}>
-        {children}
-      </div>
+      <div style={visible ? {} : { display: 'none' }}>{children}</div>
     </div>
   )
 })

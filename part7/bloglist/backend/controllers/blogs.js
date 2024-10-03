@@ -69,6 +69,7 @@ blogsRouter.delete('/:id', async (request, response) => {
   }
 
   await blog.deleteOne()
+
   response.status(204).end()
 })
 
