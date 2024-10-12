@@ -4,15 +4,21 @@ import { useState } from 'react'
 import BooksTable from './BooksTable'
 
 const Books = () => {
-  const { loading, error, data } = useQuery(ALL_BOOKS)
   const [selectedGenre, setSelectedGenre] = useState('')
+  const allBooksQuery = useQuery(ALL_BOOKS)
+  const booksByGenreQuery = useQuery(ALL_BOOKS, {
+    variables: { genre: selectedGenre },
+    skip: !selectedGenre,
+  })
+
+  const loading = allBooksQuery.loading || booksByGenreQuery.loading
+  const error = allBooksQuery.error || booksByGenreQuery.error
 
   if (loading) return <p>loading...</p>
   if (error) return <p>Error: {error.message}</p>
 
-  const books = data.allBooks
-  const genres = [...new Set(books.flatMap((book) => book.genres))]
-  const booksByGenre = selectedGenre ? books.filter((book) => book.genres.includes(selectedGenre)) : books
+  const genres = [...new Set(allBooksQuery.data.allBooks.flatMap((book) => book.genres))]
+  const booksToShow = selectedGenre ? booksByGenreQuery.data.allBooks : allBooksQuery.data.allBooks
 
   return (
     <div>
@@ -29,7 +35,7 @@ const Books = () => {
           reset
         </button>
       </div>
-      <BooksTable books={booksByGenre} />
+      <BooksTable books={booksToShow} />
     </div>
   )
 }
