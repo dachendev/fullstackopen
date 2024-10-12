@@ -149,54 +149,48 @@ const typeDefs = gql`
 
 const resolvers = {
   Author: {
-    bookCount: (obj) => books.filter((p) => p.author === obj.name).length,
+    bookCount: async (obj) => Book.countDocuments({ author: obj._id }),
   },
   Query: {
     dummy: () => 0,
-    bookCount: () => books.length,
-    authorCount: () => authors.length,
-    allBooks: (obj, args) => {
-      const byAuthor = (p) => p.author === args.author
-      const byGenre = (p) => p.genres.includes(args.genre)
-      if (args.author && args.genre) {
-        return books.filter((p) => byAuthor(p) && byGenre(p))
-      }
+    bookCount: async () => Book.countDocuments(),
+    authorCount: async () => Author.countDocuments(),
+    allBooks: async (obj, args) => {
+      const query = {}
       if (args.author) {
-        return books.filter(byAuthor)
+        const author = await Author.findOne({ name: args.author })
+        if (author) {
+          query.author = author._id
+        }
       }
       if (args.genre) {
-        return books.filter(byGenre)
+        query.genre = args.genre
       }
-      return books
+      return Book.find(query).populate('author')
     },
-    allAuthors: () => authors,
+    allAuthors: async () => Author.find(),
   },
   Mutation: {
     addBook: async (obj, args) => {
-      let author = await Author.findOne({ name: args.author })
-      if (!author) {
-        author = await Author.create({ name: args.author })
-      }
-
-      const newBook = {
+      const author = await Author.findOneAndUpdate(
+        { name: args.author },
+        { name: args.author },
+        { upsert: true, new: true }
+      )
+      const book = await Book.create({
         ...args,
         author: author._id,
-      }
-
-      const book = await Book.create(newBook)
+      })
       await book.populate('author')
-
       return book
     },
-    editAuthor: (obj, args) => {
-      const author = authors.find((p) => p.name === args.name)
-      if (!author) {
-        return null
-      }
-
-      const updatedAuthor = { ...author, born: args.setBornTo }
-      authors = authors.map((p) => (p.name === args.name ? updatedAuthor : p))
-      return updatedAuthor
+    editAuthor: async (obj, args) => {
+      const author = await Author.findOneAndUpdate(
+        { name: args.name },
+        { born: args.setBornTo },
+        { new: true }
+      )
+      return author || null
     },
   },
 }
