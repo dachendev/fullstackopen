@@ -1,30 +1,76 @@
-import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import "./App.css";
-import Authors from "./components/Authors";
-import Books from "./components/Books";
-import NewBook from "./components/NewBook";
+import { useMutation } from '@apollo/client'
+import { useEffect } from 'react'
+import { Link, Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import './App.css'
+import Authors from './components/Authors'
+import Books from './components/Books'
+import LoginForm from './components/LoginForm'
+import NewBook from './components/NewBook'
+import { LOGIN } from './queries'
+import { useTokenContext, useTokenDispatch } from './TokenContext'
+
+const Login = () => {
+  const tokenDispatch = useTokenDispatch()
+  const [login, { data }] = useMutation(LOGIN)
+
+  useEffect(() => {
+    if (data) {
+      const token = data.login.value
+      tokenDispatch({ type: 'set', payload: token })
+    }
+  }, [data, tokenDispatch])
+
+  const onLogin = ({ username, password }) => {
+    console.log('Logging in with credentials:', username, password)
+    login({ variables: { username, password } })
+  }
+
+  return (
+    <>
+      <LoginForm onLogin={onLogin} />
+    </>
+  )
+}
 
 const App = () => {
+  const [token, tokenDispatch] = useTokenContext()
+
+  const logout = () => {
+    tokenDispatch({ type: 'reset' })
+  }
+
   return (
     <Router>
       <div>
-        <Link role="button" to="/">
+        <Link to="/" role="button">
           authors
         </Link>
-        <Link role="button" to="/books">
+        <Link to="/books" role="button">
           books
         </Link>
-        <Link role="button" to="/add">
-          add book
-        </Link>
+        {token ? (
+          <>
+            <Link to="/add" role="button">
+              add book
+            </Link>
+            <button type="button" onClick={logout}>
+              logout
+            </button>
+          </>
+        ) : (
+          <Link to="/login" role="button">
+            login
+          </Link>
+        )}
       </div>
       <Routes>
-        <Route path="/add" element={<NewBook />} />
+        <Route path="/login" element={!token ? <Login /> : <Navigate to="/" />} />
+        <Route path="/add" element={token ? <NewBook /> : <Navigate to="/login" />} />
         <Route path="/books" element={<Books />} />
         <Route path="/" element={<Authors />} />
       </Routes>
     </Router>
-  );
-};
+  )
+}
 
-export default App;
+export default App

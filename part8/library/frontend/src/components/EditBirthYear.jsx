@@ -1,40 +1,47 @@
-import { useMutation, useQuery } from "@apollo/client";
-import { useState } from "react";
-import { ALL_AUTHORS, EDIT_AUTHOR } from "../queries";
+import { useMutation, useQuery } from '@apollo/client'
+import { useEffect, useState } from 'react'
+import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries'
 
 export const EditBirthYear = () => {
-  const [selectedName, setSelectedName] = useState("");
-  const [born, setBorn] = useState("");
+  const [selectedName, setSelectedName] = useState('')
+  const [born, setBorn] = useState('')
 
-  const { loading, error, data } = useQuery(ALL_AUTHORS);
+  const { loading, error, data } = useQuery(ALL_AUTHORS)
+
+  useEffect(() => {
+    if (data) {
+      setSelectedName(data.allAuthors[0].name)
+    }
+  }, [data, setSelectedName])
+
   const [editAuthor] = useMutation(EDIT_AUTHOR, {
     refetchQueries: [{ query: ALL_AUTHORS }],
-  });
+  })
 
   const onSubmit = (event) => {
-    event.preventDefault();
+    event.preventDefault()
 
-    console.log("edit birth year");
+    console.log('edit birth year')
 
     editAuthor({
       variables: {
         name: selectedName,
         setBornTo: Number(born),
       },
-    });
+    })
 
-    setSelectedName("");
-    setBorn("");
-  };
+    setSelectedName('')
+    setBorn('')
+  }
 
-  if (loading) return <p>loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (loading) return <p>loading...</p>
+  if (error) return <p>Error: {error.message}</p>
 
   return (
     <div>
       <form onSubmit={onSubmit}>
         <div>
-          name{" "}
+          name{' '}
           <select
             value={selectedName}
             onChange={(e) => setSelectedName(e.target.value)}
@@ -47,7 +54,7 @@ export const EditBirthYear = () => {
           </select>
         </div>
         <div>
-          born{" "}
+          born{' '}
           <input
             type="number"
             value={born}
@@ -57,7 +64,7 @@ export const EditBirthYear = () => {
         <button type="submit">update author</button>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default EditBirthYear;
+export default EditBirthYear

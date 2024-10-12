@@ -1,14 +1,18 @@
-import { useQuery } from "@apollo/client";
-import { ALL_AUTHORS } from "../queries";
-import EditBirthYear from "./EditBirthYear";
+import { useQuery } from '@apollo/client'
+import { Fragment } from 'react'
+import { ALL_AUTHORS } from '../queries'
+import EditBirthYear from './EditBirthYear'
+import { useToken } from '../TokenContext'
 
 const Authors = () => {
-  const { loading, error, data } = useQuery(ALL_AUTHORS);
+  const { loading, error, data } = useQuery(ALL_AUTHORS)
+  const token = useToken()
+  const isLoggedIn = Boolean(token)
 
-  if (loading) return <p>loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (loading) return <p>loading...</p>
+  if (error) return <p>Error: {error.message}</p>
 
-  const authors = data.allAuthors;
+  const authors = data.allAuthors
 
   return (
     <div>
@@ -31,10 +35,14 @@ const Authors = () => {
           ))}
         </tbody>
       </table>
-      <h3>Set birthyear</h3>
-      <EditBirthYear />
+      {isLoggedIn && (
+        <Fragment>
+          <h3>Set birthyear</h3>
+          <EditBirthYear />
+        </Fragment>
+      )}
     </div>
-  );
-};
+  )
+}
 
-export default Authors;
+export default Authors

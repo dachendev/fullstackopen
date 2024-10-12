@@ -1,7 +1,7 @@
 /* Base styles */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
   line-height: 1.15;
   color: #000;
 }
@@ -39,10 +39,11 @@ h6 {
 
 /* Buttons */
 button,
-input[type="button"],
-input[type="submit"],
-input[type="reset"],
-a[role="button"] {
+input[type='button'],
+input[type='submit'],
+input[type='reset'],
+a[role='button'] {
+  display: inline-block;
   padding: 3px 8px;
   font-size: 1em;
   background-color: #e9e9ed;
@@ -51,20 +52,20 @@ a[role="button"] {
 }
 
 button:hover,
-input[type="button"]:hover,
-input[type="submit"]:hover,
-input[type="reset"]:hover,
-a[role="button"]:hover {
+input[type='button']:hover,
+input[type='submit']:hover,
+input[type='reset']:hover,
+a[role='button']:hover {
   background-color: #d0d0d7;
 }
 
 /* Form inputs */
-input[type="text"],
-input[type="password"],
-input[type="email"],
-input[type="number"],
-input[type="tel"],
-input[type="url"],
+input[type='text'],
+input[type='password'],
+input[type='email'],
+input[type='number'],
+input[type='tel'],
+input[type='url'],
 textarea {
   padding: 3px 5px;
   border: 1px solid #8f8f9d;
