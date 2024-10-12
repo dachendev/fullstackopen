@@ -19,11 +19,7 @@ const TokenContext = createContext()
 export const TokenContextProvider = ({ children }) => {
   const storedToken = localStorage.getItem('token')
   const [token, tokenDispatch] = useReducer(tokenReducer, storedToken)
-  return (
-    <TokenContext.Provider value={[token, tokenDispatch]}>
-      {children}
-    </TokenContext.Provider>
-  )
+  return <TokenContext.Provider value={[token, tokenDispatch]}>{children}</TokenContext.Provider>
 }
 
 TokenContextProvider.propTypes = {

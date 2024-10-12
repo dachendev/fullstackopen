@@ -42,10 +42,7 @@ export const EditBirthYear = () => {
       <form onSubmit={onSubmit}>
         <div>
           name{' '}
-          <select
-            value={selectedName}
-            onChange={(e) => setSelectedName(e.target.value)}
-          >
+          <select value={selectedName} onChange={(e) => setSelectedName(e.target.value)}>
             {data.allAuthors.map((obj) => (
               <option key={obj.name} value={obj.name}>
                 {obj.name}
@@ -54,12 +51,7 @@ export const EditBirthYear = () => {
           </select>
         </div>
         <div>
-          born{' '}
-          <input
-            type="number"
-            value={born}
-            onChange={(e) => setBorn(e.target.value)}
-          />
+          born <input type="number" value={born} onChange={(e) => setBorn(e.target.value)} />
         </div>
         <button type="submit">update author</button>
       </form>
