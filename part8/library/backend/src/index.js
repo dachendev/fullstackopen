@@ -5,6 +5,7 @@ const { v1: uuid } = require('uuid')
 const mongoose = require('mongoose')
 const Book = require('./models/Book')
 const Author = require('./models/Author')
+const { GraphQLError } = require('graphql')
 require('dotenv').config()
 
 mongoose.set('strictQuery', false)
@@ -172,25 +173,56 @@ const resolvers = {
   },
   Mutation: {
     addBook: async (obj, args) => {
-      const author = await Author.findOneAndUpdate(
-        { name: args.author },
-        { name: args.author },
-        { upsert: true, new: true }
-      )
-      const book = await Book.create({
-        ...args,
-        author: author._id,
-      })
-      await book.populate('author')
-      return book
+      try {
+        let author = await Author.findOne({ name: args.author })
+        if (!author) {
+          author = await Author.create({ name: args.author })
+        }
+        const book = await Book.create({ ...args, author: author._id })
+        await book.populate('author')
+        return book
+      } catch (error) {
+        if (error.name === 'ValidationError') {
+          throw new GraphQLError('Operation failed', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              error: error.message,
+            },
+          })
+        } else {
+          throw new GraphQLError('Unexpected error', {
+            extensions: {
+              code: 'INTERNAL_SERVER_ERROR',
+              error,
+            },
+          })
+        }
+      }
     },
     editAuthor: async (obj, args) => {
-      const author = await Author.findOneAndUpdate(
-        { name: args.name },
-        { born: args.setBornTo },
-        { new: true }
-      )
-      return author || null
+      try {
+        return Author.findOneAndUpdate(
+          { name: args.name },
+          { born: args.setBornTo },
+          { new: true, runValidators: true }
+        )
+      } catch (error) {
+        if (error.name === 'ValidationError') {
+          throw new GraphQLError('Operation failed', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              error: error.message,
+            },
+          })
+        } else {
+          throw new GraphQLError('Unexpected error', {
+            extensions: {
+              code: 'INTERNAL_SERVER_ERROR',
+              error,
+            },
+          })
+        }
+      }
     },
   },
 }
