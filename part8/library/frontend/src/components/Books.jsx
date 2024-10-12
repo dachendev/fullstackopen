@@ -1,24 +1,22 @@
 import { useQuery } from '@apollo/client'
-import { ALL_BOOKS } from '../queries'
+import { ALL_BOOKS, ALL_GENRES } from '../queries'
 import { useState } from 'react'
 import BooksTable from './BooksTable'
 
 const Books = () => {
   const [selectedGenre, setSelectedGenre] = useState('')
-  const allBooksQuery = useQuery(ALL_BOOKS)
-  const booksByGenreQuery = useQuery(ALL_BOOKS, {
-    variables: { genre: selectedGenre },
-    skip: !selectedGenre,
-  })
+  const { data: genresData, loading: genresLoading, error: genresError } = useQuery(ALL_GENRES)
+  const {
+    data: booksData,
+    loading: booksLoading,
+    error: booksError,
+  } = useQuery(ALL_BOOKS, { variables: { genre: selectedGenre || null }, fetchPolicy: 'network-only' })
 
-  const loading = allBooksQuery.loading || booksByGenreQuery.loading
-  const error = allBooksQuery.error || booksByGenreQuery.error
+  if (genresLoading || booksLoading) return <div>loading...</div>
+  if (genresError || booksError) return <div>Error: {genresError?.message || booksError?.message}</div>
 
-  if (loading) return <p>loading...</p>
-  if (error) return <p>Error: {error.message}</p>
-
-  const genres = [...new Set(allBooksQuery.data.allBooks.flatMap((book) => book.genres))]
-  const booksToShow = selectedGenre ? booksByGenreQuery.data.allBooks : allBooksQuery.data.allBooks
+  const genres = genresData?.allGenres || []
+  const books = booksData?.allBooks || []
 
   return (
     <div>
@@ -35,7 +33,7 @@ const Books = () => {
           reset
         </button>
       </div>
-      <BooksTable books={booksToShow} />
+      <BooksTable books={books} />
     </div>
   )
 }

@@ -3,20 +3,22 @@ import { ALL_BOOKS, ME } from '../queries'
 import BooksTable from './BooksTable'
 
 const Recommended = () => {
-  const meQuery = useQuery(ME)
-  const allBooksQuery = useQuery(ALL_BOOKS, {
-    variables: { genre: meQuery.data?.me.favoriteGenre },
-    skip: meQuery.loading,
+  const { data: meData, loading: meLoading, error: meError } = useQuery(ME)
+  const {
+    data: booksData,
+    loading: booksLoading,
+    error: booksError,
+  } = useQuery(ALL_BOOKS, {
+    variables: { genre: meData?.me.favoriteGenre },
+    skip: meData.loading,
+    fetchPolicy: 'network-only',
   })
 
-  const error = meQuery.error || allBooksQuery.error
-  const loading = meQuery.loading || allBooksQuery.loading
+  if (meLoading || booksLoading) return <div>loading...</div>
+  if (meError || booksError) return <div>Error: {meError?.message || booksError?.message}</div>
 
-  if (loading) return <div>loading...</div>
-  if (error) return <div>error: {error}</div>
-
-  const currentUser = meQuery.data.me
-  const allBooks = allBooksQuery.data.allBooks
+  const currentUser = meData.me
+  const books = booksData.allBooks
 
   return (
     <div>
@@ -24,7 +26,7 @@ const Recommended = () => {
       <p>
         books in your favorite genre <strong>{currentUser.favoriteGenre}</strong>
       </p>
-      <BooksTable books={allBooks} />
+      <BooksTable books={books} />
     </div>
   )
 }

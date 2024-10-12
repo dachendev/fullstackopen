@@ -50,6 +50,7 @@ const typeDefs = gql`
     authorCount: Int!
     allBooks(author: String, genre: String): [Book]!
     allAuthors: [Author]!
+    allGenres: [String]!
   }
 
   type Mutation {
@@ -84,6 +85,15 @@ const resolvers = {
       return Book.find(query).populate('author')
     },
     allAuthors: async () => Author.find(),
+    allGenres: async () => {
+      const genres = await Book.aggregate([
+        { $unwind: '$genres' },
+        { $group: { _id: null, items: { $addToSet: '$genres' } } },
+        { $project: { _id: 0, items: 1 } },
+      ])
+
+      return genres[0]?.items || []
+    },
   },
   Mutation: {
     createUser: async (obj, args) => {
