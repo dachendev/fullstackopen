@@ -8,6 +8,7 @@ import LoginForm from './components/LoginForm'
 import NewBook from './components/NewBook'
 import { LOGIN } from './queries'
 import { useTokenContext, useTokenDispatch } from './TokenContext'
+import Recommended from './components/Recommended'
 
 const Login = () => {
   const tokenDispatch = useTokenDispatch()
@@ -53,6 +54,9 @@ const App = () => {
             <Link to="/add" role="button">
               add book
             </Link>
+            <Link to="/recommended" role="button">
+              recommended
+            </Link>
             <button type="button" onClick={logout}>
               logout
             </button>
@@ -65,6 +69,7 @@ const App = () => {
       </div>
       <Routes>
         <Route path="/login" element={!token ? <Login /> : <Navigate to="/" />} />
+        <Route path="/recommended" element={token ? <Recommended /> : <Navigate to="/login" />} />
         <Route path="/add" element={token ? <NewBook /> : <Navigate to="/login" />} />
         <Route path="/books" element={<Books />} />
         <Route path="/" element={<Authors />} />

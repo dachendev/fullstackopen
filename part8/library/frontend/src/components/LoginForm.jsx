@@ -12,6 +12,7 @@ const LoginForm = ({ onLogin }) => {
 
   return (
     <div>
+      <h2>login</h2>
       <form onSubmit={onSubmit}>
         <div>
           username:

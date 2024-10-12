@@ -79,7 +79,7 @@ const resolvers = {
         }
       }
       if (args.genre) {
-        query.genre = args.genre
+        query.genres = args.genre
       }
       return Book.find(query).populate('author')
     },

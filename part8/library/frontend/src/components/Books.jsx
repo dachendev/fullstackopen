@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client'
 import { ALL_BOOKS } from '../queries'
 import { useState } from 'react'
+import BooksTable from './BooksTable'
 
 const Books = () => {
   const { loading, error, data } = useQuery(ALL_BOOKS)
@@ -28,24 +29,7 @@ const Books = () => {
           reset
         </button>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>author</th>
-            <th>published</th>
-          </tr>
-        </thead>
-        <tbody>
-          {booksByGenre.map((a) => (
-            <tr key={a.title}>
-              <td>{a.title}</td>
-              <td>{a.author.name}</td>
-              <td>{a.published}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <BooksTable books={booksByGenre} />
     </div>
   )
 }
