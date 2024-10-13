@@ -1,7 +1,8 @@
 import { useQuery } from '@apollo/client'
-import { ALL_BOOKS, ALL_GENRES } from '../queries'
+import { ALL_BOOKS, ALL_GENRES, BOOK_ADDED } from '../queries'
 import { useState } from 'react'
 import BooksTable from './BooksTable'
+import { useSubscription } from '@apollo/client'
 
 const Books = () => {
   const [selectedGenre, setSelectedGenre] = useState('')
@@ -11,6 +12,13 @@ const Books = () => {
     loading: booksLoading,
     error: booksError,
   } = useQuery(ALL_BOOKS, { variables: { genre: selectedGenre || null }, fetchPolicy: 'network-only' })
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      const addedBook = data.data.bookAdded
+      alert(`Added book: ${addedBook.title}`)
+    },
+  })
 
   if (genresLoading || booksLoading) return <div>loading...</div>
   if (genresError || booksError) return <div>Error: {genresError?.message || booksError?.message}</div>
