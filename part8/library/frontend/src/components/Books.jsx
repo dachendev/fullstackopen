@@ -4,6 +4,17 @@ import { useState } from 'react'
 import BooksTable from './BooksTable'
 import { useSubscription } from '@apollo/client'
 
+const updateCache = (cache, options, addedBook) => {
+  const uniqueByTitle = (items) => {
+    const seen = new Set()
+    return items.filter((item) => (seen.has(item.title) ? false : seen.add(item.title)))
+  }
+
+  cache.updateQuery(options, ({ allBooks }) => ({
+    allBooks: uniqueByTitle(allBooks.concat(addedBook)),
+  }))
+}
+
 const Books = () => {
   const [selectedGenre, setSelectedGenre] = useState('')
   const { data: genresData, loading: genresLoading, error: genresError } = useQuery(ALL_GENRES)
@@ -11,12 +22,13 @@ const Books = () => {
     data: booksData,
     loading: booksLoading,
     error: booksError,
-  } = useQuery(ALL_BOOKS, { variables: { genre: selectedGenre || null }, fetchPolicy: 'network-only' })
+  } = useQuery(ALL_BOOKS, { variables: { genre: selectedGenre || null }, fetchPolicy: 'cache-and-network' })
 
   useSubscription(BOOK_ADDED, {
-    onData: ({ data }) => {
+    onData: ({ data, client }) => {
       const addedBook = data.data.bookAdded
       alert(`Added book: ${addedBook.title}`)
+      updateCache(client.cache, { query: ALL_BOOKS, variables: { genre: selectedGenre || null } }, addedBook)
     },
   })
 
