@@ -10,7 +10,7 @@ const Recommended = () => {
     error: booksError,
   } = useQuery(ALL_BOOKS, {
     variables: { genre: meData?.me.favoriteGenre },
-    skip: meData.loading,
+    skip: meData?.loading,
     fetchPolicy: 'network-only',
   })
 
