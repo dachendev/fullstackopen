@@ -4,13 +4,11 @@ const User = require('./models/User')
 const jwt = require('jsonwebtoken')
 const { GraphQLError } = require('graphql')
 const { PubSub } = require('graphql-subscriptions')
+const mongoose = require('mongoose')
 
 const pubSub = new PubSub()
 
 const resolvers = {
-  Author: {
-    bookCount: async (obj) => Book.countDocuments({ author: obj._id }),
-  },
   Query: {
     me: async (obj, args, context) => {
       return context.currentUser
@@ -96,11 +94,19 @@ const resolvers = {
       try {
         let author = await Author.findOne({ name: args.author })
         if (!author) {
+          // If the author doesn't exist, create a new one
           author = await Author.create({ name: args.author })
         }
+
         const book = await Book.create({ ...args, author: author._id })
+
+        // If the book was created successfully, increment bookCount
+        author.bookCount += 1
+        await author.save()
+
         await book.populate('author')
 
+        // Publish the new book to any subscribers
         pubSub.publish('BOOK_ADDED', { bookAdded: book })
 
         return book
