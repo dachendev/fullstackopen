@@ -1,3 +1,28 @@
+interface Args {
+  hours: number[];
+  target: number;
+}
+
+const parseArguments = (args: string[]): Args => {
+  if (args.length < 4) throw new Error("Not enough arguments");
+  if (args.length > 4) throw new Error("Too many arguments");
+
+  const hours = args[2].split(",").map((s) => {
+    const num = Number(s);
+    if (isNaN(num)) {
+      throw new Error("Provided hours were not numbers");
+    }
+    return num;
+  });
+
+  const target = Number(args[3]);
+  if (isNaN(target)) {
+    throw new Error("Provided target was not a number");
+  }
+
+  return { hours, target };
+};
+
 interface Result {
   periodLength: number;
   trainingDays: number;
@@ -48,4 +73,13 @@ const calculateExercises = (hours: number[], target: number): Result => {
   };
 };
 
-console.log(calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2));
+try {
+  const { hours, target } = parseArguments(process.argv);
+  console.log(calculateExercises(hours, target));
+} catch (err: unknown) {
+  if (err instanceof Error) {
+    console.log("Error:", err.message);
+  }
+}
+
+export {};
