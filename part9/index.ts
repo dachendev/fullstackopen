@@ -1,8 +1,11 @@
 import express from "express";
 import calculateBmi from "./bmiCalculator";
+import calculateExercises from "./exerciseCalculator";
 
 const app = express();
 const port = 3000;
+
+app.use(express.json());
 
 app.get("/hello", (_, res) => {
   res.send("Hello Full Stack!");
@@ -32,6 +35,31 @@ app.get("/bmi", (req, res) => {
     weight,
     bmi,
   });
+});
+
+app.post("/exercises", (req, res) => {
+  const { dailyExercises, target } = req.body;
+
+  if (!dailyExercises || !target) {
+    res.status(400).json({
+      error: "missing parameters",
+    });
+    return;
+  }
+
+  if (
+    !Array.isArray(dailyExercises) ||
+    !dailyExercises.every((v) => typeof v === "number" && !isNaN(v)) ||
+    isNaN(Number(target))
+  ) {
+    res.status(400).json({
+      error: "malformatted parameters",
+    });
+    return;
+  }
+
+  const result = calculateExercises(dailyExercises as number[], Number(target));
+  res.json(result);
 });
 
 app.listen(port, () => {
