@@ -37,7 +37,7 @@ const calculateExercises = (hours: number[], target: number): Result => {
   let totalHours = 0;
   let trainingDays = 0;
 
-  for (let h of hours) {
+  for (const h of hours) {
     if (h > 0) trainingDays++;
     totalHours += h;
   }
