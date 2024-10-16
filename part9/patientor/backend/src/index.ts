@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
-import diagnosesData from "./data/diagnoses";
-import { getPatientsNonSensitive } from "./data/patients";
+import diagnosisService from "./services/diagnosisService";
+import patientService from "./services/patientService";
 
 const app = express();
 const port = 3001;
@@ -13,11 +13,11 @@ app.get("/api/ping", (_, res) => {
 });
 
 app.get("/api/diagnoses", (_, res) => {
-  res.json(diagnosesData);
+  res.json(diagnosisService.getDiagnoses());
 });
 
 app.get("/api/patients", (_, res) => {
-  res.json(getPatientsNonSensitive());
+  res.json(patientService.getPatientsNonSensitive());
 });
 
 app.listen(port, () => {

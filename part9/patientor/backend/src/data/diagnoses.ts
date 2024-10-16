@@ -1,8 +1,4 @@
-interface Diagnosis {
-  code: string;
-  name: string;
-  latin?: string;
-}
+import { Diagnosis } from "../types";
 
 const data: Diagnosis[] = [
   {

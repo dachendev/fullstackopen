@@ -1,16 +1,4 @@
-interface Patient {
-  id: string;
-  name: string;
-  dateOfBirth: string;
-  ssn: string;
-  gender: string;
-  occupation: string;
-}
-
-export const getPatientsNonSensitive = (): Omit<Patient, "ssn">[] => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return data.map(({ ssn: _, ...rest }) => rest);
-};
+import { Patient } from "../types";
 
 const data: Patient[] = [
   {
