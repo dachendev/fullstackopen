@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import patientService from "../../services/patients";
 import { Patient } from "../../types";
 import GenderIcon from "../GenderIcon";
+import PatientEntry from "./Entry";
 
 const PatientPage = () => {
   const patientId = useParams().id;
@@ -29,6 +30,10 @@ const PatientPage = () => {
       </h2>
       <div>ssn: {patient.ssn}</div>
       <div>occupation: {patient.occupation}</div>
+      <h3>entries</h3>
+      {patient.entries.map((entry) => (
+        <PatientEntry key={entry.id} entry={entry} />
+      ))}
     </div>
   );
 };
