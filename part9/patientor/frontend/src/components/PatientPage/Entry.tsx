@@ -1,6 +1,11 @@
-import { Entry } from "../../types";
+import { Diagnosis, Entry } from "../../types";
 
-const PatientEntry = ({ entry }: { entry: Entry }) => {
+interface Props {
+  entry: Entry;
+  diagnoses: Record<string, Diagnosis>;
+}
+
+const PatientEntry = ({ entry, diagnoses }: Props) => {
   if (entry.type === "HealthCheck") {
     return (
       <div>
@@ -19,7 +24,9 @@ const PatientEntry = ({ entry }: { entry: Entry }) => {
         </p>
         <ul>
           {entry.diagnosisCodes.map((code) => (
-            <li key={code}>{code}</li>
+            <li key={code}>
+              {code} {diagnoses[code].name}
+            </li>
           ))}
         </ul>
       </div>
@@ -35,7 +42,9 @@ const PatientEntry = ({ entry }: { entry: Entry }) => {
         {entry.diagnosisCodes && (
           <ul>
             {entry.diagnosisCodes.map((code) => (
-              <li key={code}>{code}</li>
+              <li key={code}>
+                {code} {diagnoses[code].name}
+              </li>
             ))}
           </ul>
         )}

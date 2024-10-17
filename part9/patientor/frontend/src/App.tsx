@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
+import { Button, Container, Divider, Typography } from "@mui/material";
 import axios from "axios";
-import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom";
-import { Button, Divider, Container, Typography } from "@mui/material";
-
+import { useEffect, useState } from "react";
+import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { apiBaseUrl } from "./constants";
-import { Patient } from "./types";
-
-import patientService from "./services/patients";
+import { Diagnosis, Patient } from "./types";
 import PatientListPage from "./components/PatientListPage";
 import PatientPage from "./components/PatientPage";
+import diagnosisService from "./services/diagnoses";
+import patientService from "./services/patients";
 
 const App = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [diagnoses, setDiagnoses] = useState<Record<string, Diagnosis>>({});
 
   useEffect(() => {
     void axios.get<void>(`${apiBaseUrl}/ping`);
@@ -21,6 +21,19 @@ const App = () => {
       setPatients(patients);
     };
     void fetchPatientList();
+  }, []);
+
+  useEffect(() => {
+    const fetchDiagnosisList = async () => {
+      const diagnoses = await diagnosisService.getAll();
+      // convert to hashmap for O(1) lookup
+      const diagnosisMap = diagnoses.reduce((map, diagnosis) => {
+        map[diagnosis.code] = diagnosis;
+        return map;
+      }, {} as Record<string, Diagnosis>);
+      setDiagnoses(diagnosisMap);
+    };
+    fetchDiagnosisList();
   }, []);
 
   return (
@@ -35,7 +48,10 @@ const App = () => {
           </Button>
           <Divider hidden />
           <Routes>
-            <Route path="/:id" element={<PatientPage />} />
+            <Route
+              path="/:id"
+              element={<PatientPage diagnoses={diagnoses} />}
+            />
             <Route
               path="/"
               element={
