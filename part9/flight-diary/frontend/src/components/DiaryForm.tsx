@@ -1,58 +1,96 @@
-import React, { useState } from "react";
+import { ChangeEvent, SyntheticEvent, useState } from "react";
 import { NewDiaryEntry, Visibility, Weather } from "../types";
 import Alert from "./Alert";
 
 interface DiaryFormProps {
-  addDiary: (diary: NewDiaryEntry) => Promise<void>;
+  onSubmit: (diary: NewDiaryEntry) => void;
   error: string | null;
 }
 
-const DiaryForm = ({ addDiary, error }: DiaryFormProps) => {
+const visibilityOptions = Object.values(Visibility);
+const weatherOptions = Object.values(Weather);
+
+const DiaryForm = ({ onSubmit, error }: DiaryFormProps) => {
   const [date, setDate] = useState("");
   const [visibility, setVisibility] = useState("");
   const [weather, setWeather] = useState("");
   const [comment, setComment] = useState("");
 
-  const onSubmit = (event: React.SyntheticEvent): void => {
+  const onVisibilityChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    event.preventDefault();
+    if (typeof event.target.value === "string") {
+      const value = event.target.value;
+      const visibility = Object.values(Visibility).find(
+        (v) => v.toString() === value
+      );
+      if (visibility) {
+        setVisibility(visibility);
+      }
+    }
+  };
+
+  const onWeatherChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    event.preventDefault();
+    if (typeof event.target.value === "string") {
+      const value = event.target.value;
+      const weather = Object.values(Weather).find(
+        (w) => w.toString() === value
+      );
+      if (weather) {
+        setWeather(weather);
+      }
+    }
+  };
+
+  const addDiary = (event: SyntheticEvent) => {
     event.preventDefault();
 
-    const newDiary: NewDiaryEntry = {
+    if (!date || !visibility || !weather || !comment) {
+      return;
+    }
+
+    onSubmit({
       date,
       visibility: visibility as Visibility,
       weather: weather as Weather,
       comment,
-    };
-
-    addDiary(newDiary);
+    });
   };
 
   return (
     <div>
       {error && <Alert color="error" text={error} />}
-      <form onSubmit={onSubmit}>
+      <form onSubmit={addDiary}>
         <div>
           date
           <input
-            type="text"
+            type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
+            required
           />
         </div>
         <div>
           visibility
-          <input
-            type="text"
-            value={visibility}
-            onChange={(e) => setVisibility(e.target.value)}
-          />
+          <select value={visibility} onChange={onVisibilityChange} required>
+            <option value=""></option>
+            {visibilityOptions.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           weather
-          <input
-            type="text"
-            value={weather}
-            onChange={(e) => setWeather(e.target.value)}
-          />
+          <select value={weather} onChange={onWeatherChange} required>
+            <option value=""></option>
+            {weatherOptions.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           comment
@@ -60,6 +98,7 @@ const DiaryForm = ({ addDiary, error }: DiaryFormProps) => {
             type="text"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
+            required
           />
         </div>
         <button type="submit">add</button>

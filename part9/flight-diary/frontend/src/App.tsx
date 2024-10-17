@@ -18,12 +18,12 @@ const App = () => {
     fetchDiaries();
   }, []);
 
-  const addDiary = async (diary: NewDiaryEntry): Promise<void> => {
+  const submitNewDiary = async (newDiary: NewDiaryEntry) => {
     console.log("add diary");
 
     try {
-      const addedDiary = await diaryService.create(diary);
-      setDiaries(diaries.concat(addedDiary));
+      const diary = await diaryService.create(newDiary);
+      setDiaries(diaries.concat(diary));
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.data && typeof error.response.data === "string") {
@@ -31,9 +31,11 @@ const App = () => {
             "Something went wrong. Error: ",
             ""
           );
+          console.error(message);
           setError(message);
         }
       } else {
+        console.error("unknown error", error);
         setError("unknown error");
       }
     }
@@ -42,7 +44,7 @@ const App = () => {
   return (
     <div>
       <h2>Add new entry</h2>
-      <DiaryForm addDiary={addDiary} error={error} />
+      <DiaryForm onSubmit={submitNewDiary} error={error} />
       <h2>Diary entries</h2>
       {diaries.map((d) => (
         <Diary key={d.id} diary={d} />
