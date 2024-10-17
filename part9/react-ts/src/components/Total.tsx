@@ -1,4 +1,4 @@
-import { CoursePart } from "../types";
+import { CoursePart } from "../courseParts";
 
 const Total = ({ parts }: { parts: CoursePart[] }) => {
   const totalExercises = parts.reduce(
