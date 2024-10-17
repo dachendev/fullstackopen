@@ -24,6 +24,17 @@ app.get("/api/patients", (_, res) => {
   res.json(patientService.getPatientsNonSensitive());
 });
 
+app.get("/api/patients/:id", (req, res) => {
+  const patientId = req.params.id;
+  const patient = patientService.findPatientById(patientId);
+
+  if (patient) {
+    res.json(patient);
+  } else {
+    res.status(404).json({ error: "not found" });
+  }
+});
+
 app.post(
   "/api/patients",
   newPatientParser,
