@@ -18,12 +18,12 @@ interface EntryBase {
   description: string;
 }
 
-interface HealthCheckEntry extends EntryBase {
+export interface HealthCheckEntry extends EntryBase {
   healthCheckRating: number;
   type: "HealthCheck";
 }
 
-interface OccupationalHealthcareEntry extends EntryBase {
+export interface OccupationalHealthcareEntry extends EntryBase {
   employerName: string;
   diagnosisCodes?: string[];
   sickLeave?: {
@@ -33,7 +33,7 @@ interface OccupationalHealthcareEntry extends EntryBase {
   type: "OccupationalHealthcare";
 }
 
-interface HospitalEntry extends EntryBase {
+export interface HospitalEntry extends EntryBase {
   diagnosisCodes: string[];
   discharge: {
     date: string;

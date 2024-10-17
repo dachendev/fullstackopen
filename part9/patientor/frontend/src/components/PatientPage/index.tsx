@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import patientService from "../../services/patients";
 import { Diagnosis, Patient } from "../../types";
 import GenderIcon from "../GenderIcon";
-import PatientEntry from "./Entry";
+import PatientEntry from "./PatientEntry";
 
 interface Props {
   diagnoses: Record<string, Diagnosis>;
