@@ -21,8 +21,15 @@ interface EntryBase {
   description: string;
 }
 
+export enum HealthCheckRating {
+  "Healthy" = 0,
+  "LowRisk" = 1,
+  "HighRisk" = 2,
+  "CriticalRisk" = 3,
+}
+
 interface HealthCheckEntry extends EntryBase {
-  healthCheckRating: number;
+  healthCheckRating: HealthCheckRating;
   type: "HealthCheck";
 }
 

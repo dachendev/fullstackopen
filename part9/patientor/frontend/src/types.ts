@@ -18,8 +18,15 @@ interface EntryBase {
   description: string;
 }
 
+export enum HealthCheckRating {
+  "Healthy" = 0,
+  "LowRisk" = 1,
+  "HighRisk" = 2,
+  "CriticalRisk" = 3,
+}
+
 export interface HealthCheckEntry extends EntryBase {
-  healthCheckRating: number;
+  healthCheckRating: HealthCheckRating;
   type: "HealthCheck";
 }
 
@@ -58,3 +65,9 @@ export interface Patient {
 }
 
 export type PatientFormValues = Omit<Patient, "id" | "entries">;
+
+type UnionOmit<T, K extends string | number | symbol> = T extends unknown
+  ? Omit<T, K>
+  : never;
+
+export type EntryFormValues = UnionOmit<Entry, "id">;
