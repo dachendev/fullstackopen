@@ -1,47 +1,40 @@
 import {
   Alert,
   Box,
-  Button,
-  Input,
-  MenuItem,
-  Select,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
   Typography,
 } from "@mui/material";
-import { SyntheticEvent, useState } from "react";
-import { EntryFormValues, HealthCheckRating } from "../../types";
+import { ChangeEvent, useState } from "react";
+import { Entry, EntryFormValues } from "../../types";
+import AddEntryOfTypeForm from "./AddEntryOfTypeForm";
 
 interface Props {
   onSubmit: (values: EntryFormValues) => Promise<void>;
   error: string;
 }
 
-const healthCheckRatingOptions = Object.values(HealthCheckRating)
-  .filter((x) => typeof x === "string")
-  .map((key) => ({
-    label: key,
-    value: HealthCheckRating[key as keyof typeof HealthCheckRating],
-  }));
+const entryTypeOptions: Entry["type"][] = [
+  "HealthCheck",
+  "OccupationalHealthcare",
+  "Hospital",
+] as const;
+
+const isEntryType = (a: unknown): a is Entry["type"] => {
+  return (
+    typeof a === "string" && entryTypeOptions.indexOf(a as Entry["type"]) !== -1
+  );
+};
 
 const AddEntryForm = ({ onSubmit, error }: Props): JSX.Element => {
-  const [date, setDate] = useState("");
-  const [specialist, setSpecialist] = useState("");
-  const [description, setDescription] = useState("");
-  const [healthCheckRating, setHealthCheckRating] = useState("");
+  const [type, setType] = useState<Entry["type"]>("HealthCheck");
 
-  const addEntry = (event: SyntheticEvent) => {
+  const onTypeChange = (event: ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
-
-    if (!date || !specialist || !description || !healthCheckRating) {
-      return;
+    if (isEntryType(event.target.value)) {
+      setType(event.target.value);
     }
-
-    onSubmit({
-      date,
-      type: "HealthCheck",
-      specialist,
-      description,
-      healthCheckRating: Number(healthCheckRating),
-    });
   };
 
   return (
@@ -51,57 +44,20 @@ const AddEntryForm = ({ onSubmit, error }: Props): JSX.Element => {
           {error}
         </Alert>
       )}
-      <form onSubmit={addEntry}>
-        <Box sx={{ mb: 2 }}>
-          <Typography component="label">description</Typography>
-          <Input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            fullWidth
-            required
-          />
-        </Box>
-        <Box sx={{ mb: 2 }}>
-          <Typography component="label">date</Typography>
-          <Input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            fullWidth
-            required
-          />
-        </Box>
-        <Box sx={{ mb: 2 }}>
-          <Typography component="label">specialist</Typography>
-          <Input
-            type="text"
-            value={specialist}
-            onChange={(e) => setSpecialist(e.target.value)}
-            fullWidth
-            required
-          />
-        </Box>
-        <Box sx={{ mb: 2 }}>
-          <Typography component="label">health check rating</Typography>
-          <Select
-            value={healthCheckRating}
-            onChange={(e) => setHealthCheckRating(e.target.value)}
-            fullWidth
-            required
-          >
-            <MenuItem value=""></MenuItem>
-            {healthCheckRatingOptions.map(({ label, value }) => (
-              <MenuItem key={value} value={value}>
-                {label}
-              </MenuItem>
-            ))}
-          </Select>
-        </Box>
-        <Button variant="contained" type="submit">
-          add
-        </Button>
-      </form>
+      <Box sx={{ mb: 2 }}>
+        <Typography component="label">type</Typography>
+        <RadioGroup value={type} onChange={onTypeChange}>
+          {entryTypeOptions.map((type) => (
+            <FormControlLabel
+              key={type}
+              value={type}
+              control={<Radio />}
+              label={type}
+            />
+          ))}
+        </RadioGroup>
+        <AddEntryOfTypeForm type={type} onSubmit={onSubmit} />
+      </Box>
     </Box>
   );
 };

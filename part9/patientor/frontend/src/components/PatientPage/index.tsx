@@ -1,11 +1,11 @@
+import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import patientService from "../../services/patients";
 import { Diagnosis, EntryFormValues, Patient } from "../../types";
+import AddEntryForm from "../AddEntryForm";
 import GenderIcon from "../GenderIcon";
 import PatientEntry from "./PatientEntry";
-import AddEntryForm from "../AddEntryForm";
-import { AxiosError } from "axios";
 
 interface Props {
   diagnoses: Record<string, Diagnosis>;

@@ -18,7 +18,7 @@ const HospitalEntryDetails = ({ entry, diagnoses }: Props) => {
       <ul>
         {entry.diagnosisCodes.map((code) => (
           <li key={code}>
-            {code} {diagnoses[code].name}
+            {code} {diagnoses[code]?.name}
           </li>
         ))}
       </ul>
