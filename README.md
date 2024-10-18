@@ -28,7 +28,7 @@ Here's a list of the main parts of the course and my progress:
 - [x] [Part 6: Advanced state management](./part6)
 - [x] [Part 7: React router, custom hooks, styling app with CSS and webpack](./part7)
 - [x] [Part 8: GraphQL](./part8)
-- [ ] [Part 9: TypeScript](./part9)
+- [x] [Part 9: TypeScript](./part9)
 - [ ] [Part 10: React Native](./part10)
 - [ ] [Part 11: CI/CD](./part11)
 - [ ] [Part 12: Containers](./part12)
