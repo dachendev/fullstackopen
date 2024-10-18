@@ -1,4 +1,4 @@
-import { Entry, EntryFormValues } from "../../types";
+import { Diagnosis, Entry, EntryFormValues } from "../../types";
 import AddHealthCheckEntryForm from "./AddHealthCheckEntryForm";
 import AddHospitalEntryForm from "./AddHospitalEntryForm";
 import AddOccupationalHealthcareEntryForm from "./AddOccupationalHealthcareEntryForm";
@@ -6,19 +6,26 @@ import AddOccupationalHealthcareEntryForm from "./AddOccupationalHealthcareEntry
 interface AddEntryOfTypeForm {
   type: Entry["type"];
   onSubmit: (values: EntryFormValues) => Promise<void>;
+  diagnoses: Record<string, Diagnosis>;
 }
 
 const AddEntryOfTypeForm = ({
   type,
   onSubmit,
+  diagnoses,
 }: AddEntryOfTypeForm): JSX.Element => {
   switch (type) {
     case "HealthCheck":
       return <AddHealthCheckEntryForm onSubmit={onSubmit} />;
     case "Hospital":
-      return <AddHospitalEntryForm onSubmit={onSubmit} />;
+      return <AddHospitalEntryForm onSubmit={onSubmit} diagnoses={diagnoses} />;
     case "OccupationalHealthcare":
-      return <AddOccupationalHealthcareEntryForm onSubmit={onSubmit} />;
+      return (
+        <AddOccupationalHealthcareEntryForm
+          onSubmit={onSubmit}
+          diagnoses={diagnoses}
+        />
+      );
   }
 
   const _exhaustiveCheck: never = type;

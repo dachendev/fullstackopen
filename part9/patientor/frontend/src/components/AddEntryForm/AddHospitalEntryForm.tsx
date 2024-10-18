@@ -1,25 +1,42 @@
-import { Box, Button, Input, Typography } from "@mui/material";
-import { EntryFormValues } from "../../types";
-import { useState } from "react";
+import {
+  Box,
+  Button,
+  Input,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Typography,
+} from "@mui/material";
+import { Diagnosis, EntryFormValues } from "../../types";
+import { SyntheticEvent, useState } from "react";
 
 interface Props {
   onSubmit: (values: EntryFormValues) => Promise<void>;
+  diagnoses: Record<string, Diagnosis>;
 }
 
-const AddHospitalEntryForm = ({ onSubmit }: Props) => {
+const AddHospitalEntryForm = ({ onSubmit, diagnoses }: Props) => {
   const [date, setDate] = useState("");
   const [specialist, setSpecialist] = useState("");
   const [description, setDescription] = useState("");
-  const [diagnosisCodes, setDiagnosisCodes] = useState("");
+  const [diagnosisCodes, setDiagnosisCodes] = useState<string[]>([]);
   const [dischargeDate, setDischargeDate] = useState("");
   const [dischargeCriteria, setDischargeCriteria] = useState("");
 
-  const addEntry = () => {
+  const onDiagnosisCodesChange = (
+    event: SelectChangeEvent<typeof diagnosisCodes>
+  ) => {
+    const { value } = event.target;
+    setDiagnosisCodes(typeof value === "string" ? value.split(/,\w?/g) : value);
+  };
+
+  const addEntry = (event: SyntheticEvent) => {
+    event.preventDefault();
     onSubmit({
       date,
       specialist,
       description,
-      diagnosisCodes: diagnosisCodes.split(/,\s?/g),
+      diagnosisCodes,
       discharge: {
         date: dischargeDate,
         criteria: dischargeCriteria,
@@ -62,13 +79,19 @@ const AddHospitalEntryForm = ({ onSubmit }: Props) => {
       </Box>
       <Box sx={{ mb: 2 }}>
         <Typography component="label">diagnosis codes</Typography>
-        <Input
-          type="text"
+        <Select
+          multiple
           value={diagnosisCodes}
-          onChange={(e) => setDiagnosisCodes(e.target.value)}
+          onChange={onDiagnosisCodesChange}
           fullWidth
           required
-        />
+        >
+          {Object.values(diagnoses).map((d) => (
+            <MenuItem key={d.code} value={d.code}>
+              {d.code}
+            </MenuItem>
+          ))}
+        </Select>
       </Box>
       <Box sx={{ mb: 2 }}>
         <Typography component="label">discharge date</Typography>

@@ -59,7 +59,11 @@ const PatientPage = ({ diagnoses }: Props) => {
       <div>ssn: {patient.ssn}</div>
       <div>occupation: {patient.occupation}</div>
       <h3>add entry</h3>
-      <AddEntryForm onSubmit={submitNewEntry} error={error} />
+      <AddEntryForm
+        onSubmit={submitNewEntry}
+        error={error}
+        diagnoses={diagnoses}
+      />
       <h3>entries</h3>
       {patient.entries.map((entry) => (
         <PatientEntry key={entry.id} entry={entry} diagnoses={diagnoses} />

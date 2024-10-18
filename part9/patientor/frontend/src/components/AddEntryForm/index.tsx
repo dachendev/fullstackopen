@@ -7,12 +7,13 @@ import {
   Typography,
 } from "@mui/material";
 import { ChangeEvent, useState } from "react";
-import { Entry, EntryFormValues } from "../../types";
+import { Diagnosis, Entry, EntryFormValues } from "../../types";
 import AddEntryOfTypeForm from "./AddEntryOfTypeForm";
 
 interface Props {
   onSubmit: (values: EntryFormValues) => Promise<void>;
   error: string;
+  diagnoses: Record<string, Diagnosis>;
 }
 
 const entryTypeOptions: Entry["type"][] = [
@@ -27,7 +28,7 @@ const isEntryType = (a: unknown): a is Entry["type"] => {
   );
 };
 
-const AddEntryForm = ({ onSubmit, error }: Props): JSX.Element => {
+const AddEntryForm = ({ onSubmit, error, diagnoses }: Props): JSX.Element => {
   const [type, setType] = useState<Entry["type"]>("HealthCheck");
 
   const onTypeChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -56,7 +57,11 @@ const AddEntryForm = ({ onSubmit, error }: Props): JSX.Element => {
             />
           ))}
         </RadioGroup>
-        <AddEntryOfTypeForm type={type} onSubmit={onSubmit} />
+        <AddEntryOfTypeForm
+          type={type}
+          onSubmit={onSubmit}
+          diagnoses={diagnoses}
+        />
       </Box>
     </Box>
   );

@@ -1,26 +1,38 @@
-import { Box, Button, Input, Typography } from "@mui/material";
-import { EntryFormValues } from "../../types";
+import {
+  Box,
+  Button,
+  Input,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Typography,
+} from "@mui/material";
+import { Diagnosis, EntryFormValues } from "../../types";
 import { SyntheticEvent, useState } from "react";
 
 interface Props {
   onSubmit: (values: EntryFormValues) => Promise<void>;
+  diagnoses: Record<string, Diagnosis>;
 }
 
-const AddOccupationalHealthcareEntryForm = ({ onSubmit }: Props) => {
+const AddOccupationalHealthcareEntryForm = ({ onSubmit, diagnoses }: Props) => {
   const [date, setDate] = useState("");
   const [specialist, setSpecialist] = useState("");
   const [description, setDescription] = useState("");
   const [employerName, setEmployerName] = useState("");
-  const [diagnosisCodes, setDiagnosisCodes] = useState("");
+  const [diagnosisCodes, setDiagnosisCodes] = useState<string[]>([]);
   const [sickLeaveStartDate, setSickLeaveStartDate] = useState("");
   const [sickLeaveEndDate, setSickLeaveEndDate] = useState("");
 
+  const onDiagnosisCodesChange = (
+    event: SelectChangeEvent<typeof diagnosisCodes>
+  ) => {
+    const { value } = event.target;
+    setDiagnosisCodes(typeof value === "string" ? value.split(/,\w?/g) : value);
+  };
+
   const addEntry = (event: SyntheticEvent) => {
     event.preventDefault();
-
-    const diagnosisCodesList = diagnosisCodes
-      ? diagnosisCodes.split(/,\w?/g)
-      : undefined;
 
     const sickLeave =
       sickLeaveStartDate && sickLeaveEndDate
@@ -35,7 +47,7 @@ const AddOccupationalHealthcareEntryForm = ({ onSubmit }: Props) => {
       specialist,
       description,
       employerName,
-      diagnosisCodes: diagnosisCodesList,
+      diagnosisCodes: diagnosisCodes.length > 0 ? diagnosisCodes : undefined,
       sickLeave,
       type: "OccupationalHealthcare",
     });
@@ -81,12 +93,20 @@ const AddOccupationalHealthcareEntryForm = ({ onSubmit }: Props) => {
         />
       </Box>
       <Box sx={{ mb: 2 }}>
-        <Typography component="label">Diagnosis Codes</Typography>
-        <Input
-          fullWidth
+        <Typography component="label">diagnosis codes</Typography>
+        <Select
+          multiple
           value={diagnosisCodes}
-          onChange={(e) => setDiagnosisCodes(e.target.value)}
-        />
+          onChange={onDiagnosisCodesChange}
+          fullWidth
+          required
+        >
+          {Object.values(diagnoses).map((d) => (
+            <MenuItem key={d.code} value={d.code}>
+              {d.code}
+            </MenuItem>
+          ))}
+        </Select>
       </Box>
       <Box sx={{ mb: 2, display: "flex", gap: 2 }}>
         <Box sx={{ flex: 1 }}>
