@@ -1,11 +1,26 @@
-import { Alert, Box, Button, Input, Typography } from "@mui/material";
-import { ChangeEvent, SyntheticEvent, useState } from "react";
-import { EntryFormValues } from "../types";
+import {
+  Alert,
+  Box,
+  Button,
+  Input,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
+import { SyntheticEvent, useState } from "react";
+import { EntryFormValues, HealthCheckRating } from "../../types";
 
 interface Props {
   onSubmit: (values: EntryFormValues) => Promise<void>;
   error: string;
 }
+
+const healthCheckRatingOptions = Object.values(HealthCheckRating)
+  .filter((x) => typeof x === "string")
+  .map((key) => ({
+    label: key,
+    value: HealthCheckRating[key as keyof typeof HealthCheckRating],
+  }));
 
 const AddEntryForm = ({ onSubmit, error }: Props): JSX.Element => {
   const [date, setDate] = useState("");
@@ -13,16 +28,13 @@ const AddEntryForm = ({ onSubmit, error }: Props): JSX.Element => {
   const [description, setDescription] = useState("");
   const [healthCheckRating, setHealthCheckRating] = useState("");
 
-  const onHealthCheckRatingChange = (event: ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    if (event.target.value && !isNaN(Number(event.target.value))) {
-      const value = event.target.value;
-      setHealthCheckRating(value);
-    }
-  };
-
   const addEntry = (event: SyntheticEvent) => {
     event.preventDefault();
+
+    if (!date || !specialist || !description || !healthCheckRating) {
+      return;
+    }
+
     onSubmit({
       date,
       type: "HealthCheck",
@@ -47,6 +59,7 @@ const AddEntryForm = ({ onSubmit, error }: Props): JSX.Element => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             fullWidth
+            required
           />
         </Box>
         <Box sx={{ mb: 2 }}>
@@ -56,6 +69,7 @@ const AddEntryForm = ({ onSubmit, error }: Props): JSX.Element => {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             fullWidth
+            required
           />
         </Box>
         <Box sx={{ mb: 2 }}>
@@ -65,16 +79,24 @@ const AddEntryForm = ({ onSubmit, error }: Props): JSX.Element => {
             value={specialist}
             onChange={(e) => setSpecialist(e.target.value)}
             fullWidth
+            required
           />
         </Box>
         <Box sx={{ mb: 2 }}>
           <Typography component="label">health check rating</Typography>
-          <Input
-            type="number"
+          <Select
             value={healthCheckRating}
-            onChange={onHealthCheckRatingChange}
+            onChange={(e) => setHealthCheckRating(e.target.value)}
             fullWidth
-          />
+            required
+          >
+            <MenuItem value=""></MenuItem>
+            {healthCheckRatingOptions.map(({ label, value }) => (
+              <MenuItem key={value} value={value}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
         </Box>
         <Button variant="contained" type="submit">
           add
