@@ -1,0 +1,8 @@
+docker start -i zealous_khayyam
+apt-get -y install curl unzip
+curl -fsSL https://fnm.vercel.app/install | bash
+source ~/.bashrc
+fnm use --install-if-missing 22
+node -v
+node /usr/src/app/index.js
+exit
