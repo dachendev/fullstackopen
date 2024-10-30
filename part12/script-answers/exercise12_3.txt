@@ -1,0 +1,5 @@
+docker start -i zealous_khayyam
+apt-get update
+apt-get -y install nano
+nano /usr/src/app/index.js
+exit
