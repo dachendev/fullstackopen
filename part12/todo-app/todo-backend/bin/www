@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require("dotenv").config();
 
 var process = require("node:process");
 
