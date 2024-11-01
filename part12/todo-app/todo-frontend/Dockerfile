@@ -1,15 +1,16 @@
-FROM node:20.9.0-bullseye-slim AS build-stage
-
-ENV VITE_BACKEND_URL=http://localhost:3000
-
+FROM node:20.9.0-bullseye-slim AS node
+USER node
 WORKDIR /usr/src/app
 
-COPY --chown=node:node . /usr/src/app
+FROM node AS test
+COPY . .
+RUN npm ci --include=dev
+RUN npm test
 
-RUN npm ci
+FROM node AS build
+ENV VITE_BACKEND_URL=http://localhost:3000
+COPY --from=test /usr/src/app .
 RUN npm run build
 
-# new build stage
 FROM nginx:1.25-alpine
-
-COPY --from=build-stage /usr/src/app/dist /usr/share/nginx/html
+COPY --from=build /usr/src/app/dist /usr/share/nginx/html
