@@ -1,7 +1,10 @@
 services:
-  app:
+  react-app:
     image: todo-frontend-dev
 
+  express-app:
+    image: todo-backend-dev
+  
   nginx:
     image: nginx:1.20.1
     volumes:
@@ -10,4 +13,5 @@ services:
       - 8080:80
     container_name: reverse-proxy
     depends_on:
-      - app
+      - react-app
+      - express-app
