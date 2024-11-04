@@ -1,7 +1,7 @@
 import axios from "axios";
 import { DiaryEntry, NewDiaryEntry } from "../types";
 
-const apiBaseUrl = "http://localhost:3000/api";
+const apiBaseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000/api";
 
 const getAll = async (): Promise<DiaryEntry[]> => {
   const { data } = await axios.get<DiaryEntry[]>(`${apiBaseUrl}/diaries`);

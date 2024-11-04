@@ -1,0 +1,32 @@
+services:
+  app:
+    image: flight-diary-frontend-dev
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    environment:
+      VITE_BACKEND_URL: http://localhost:8080/api
+    volumes:
+      - ./frontend:/usr/src/app
+    ports:
+      - 5173:5173
+
+  server:
+    image: flight-diary-backend-dev
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./backend:/usr/src/app
+    ports:
+      - 3000:3000
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+    depends_on:
+      - app
+      - server
