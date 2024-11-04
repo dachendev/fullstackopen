@@ -31,7 +31,10 @@
     "vite": "^5.2.0",
     "vitest": "^2.1.4"
   },
-  "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "*"
+  "overrides": {
+    "vite": {
+      "rollup": "npm:@rollup/wasm-node",
+      "esbuild": "npm:esbuild-wasm"
+    }
   }
 }
