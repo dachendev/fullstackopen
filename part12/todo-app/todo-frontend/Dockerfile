@@ -8,7 +8,7 @@ RUN npm ci --include=dev
 RUN npm test
 
 FROM node AS build
-ENV VITE_BACKEND_URL=http://localhost:3000
+ENV VITE_BACKEND_URL=http://localhost:8080/api
 COPY --from=test /usr/src/app .
 RUN npm run build
 
