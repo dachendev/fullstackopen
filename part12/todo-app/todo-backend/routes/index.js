@@ -18,6 +18,7 @@ router.get('/', async (req, res) => {
 
 router.get('/statistics', async (req, res) => {
   const n = await redisService.getAddedTodos();
+  // res.send({ success: true })
   res.send({ added_todos: n });
 });
 
