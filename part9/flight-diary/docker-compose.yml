@@ -1,0 +1,18 @@
+services:
+  app:
+    image: flight-diary-frontend
+    build: ./frontend
+
+  server:
+    image: flight-diary-backend
+    build: ./backend
+
+  reverse-proxy:
+    image: nginx:1.27.2-alpine-slim
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+    depends_on:
+      - app
+      - server
