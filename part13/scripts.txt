@@ -1,0 +1,2 @@
+docker compose up -d
+docker exec -it part13-pg psql -U postgres postgres
