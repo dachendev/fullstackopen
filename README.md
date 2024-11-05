@@ -31,7 +31,7 @@ Here's a list of the main parts of the course and my progress:
 - [x] [Part 9: TypeScript](./part9)
 - [ ] [Part 10: React Native](./part10)
 - [ ] [Part 11: CI/CD](./part11)
-- [ ] [Part 12: Containers](./part12)
+- [x] [Part 12: Containers](./part12)
 - [ ] [Part 13: Using relational databases](./part13)
 
 ## 📬 Contact
