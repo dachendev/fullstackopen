@@ -1,8 +1,14 @@
 {
   "private": true,
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
   "dependencies": {
     "express": "^5.0.1",
     "pg": "^8.13.1",
     "sequelize": "^6.37.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
   }
 }
