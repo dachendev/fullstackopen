@@ -1,4 +1,4 @@
-const { User, Blog } = require("../models");
+const { User, Blog, Reading } = require("../models");
 const express = require("express");
 
 const router = express.Router();
@@ -11,6 +11,24 @@ router.get("/", async (req, res) => {
     },
   });
   res.send(users);
+});
+
+router.get("/:id", async (req, res) => {
+  const user = await User.findByPk(req.params.id, {
+    attributes: ["name", "username"],
+    include: [
+      {
+        model: Blog,
+        as: "readings",
+        attributes: ["id", "url", "title", "author", "likes", "year"],
+        through: {
+          attributes: [],
+        },
+      },
+    ],
+  });
+
+  res.send(user);
 });
 
 router.post("/", async (req, res) => {
