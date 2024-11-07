@@ -40,8 +40,13 @@ router.get("/", async (req, res) => {
   const where = {};
 
   if (req.query.search) {
-    where.title = {
-      [Op.substring]: req.query.search,
+    where[Op.or] = {
+      title: {
+        [Op.substring]: req.query.search,
+      },
+      author: {
+        [Op.substring]: req.query.search,
+      },
     };
   }
 
