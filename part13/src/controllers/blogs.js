@@ -2,6 +2,7 @@ const { User, Blog } = require("../models");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const { SECRET } = require("../util/config");
+const { Op } = require("sequelize");
 
 const getToken = (req) => {
   const auth = req.get("authorization");
@@ -36,11 +37,20 @@ const authMiddleware = async (req, res, next) => {
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  const where = {};
+
+  if (req.query.search) {
+    where.title = {
+      [Op.substring]: req.query.search,
+    };
+  }
+
   const blogs = await Blog.findAll({
     attributes: { exclude: ["userId"] },
     include: {
       model: User,
     },
+    where,
   });
   res.send(blogs);
 });
