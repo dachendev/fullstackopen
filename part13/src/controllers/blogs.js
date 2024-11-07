@@ -36,7 +36,12 @@ const authMiddleware = async (req, res, next) => {
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const blogs = await Blog.findAll();
+  const blogs = await Blog.findAll({
+    attributes: { exclude: ["userId"] },
+    include: {
+      model: User,
+    },
+  });
   res.send(blogs);
 });
 
