@@ -15,6 +15,14 @@ app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
   }
+
+  if (
+    err.name === "SequelizeUniqueConstraintError" ||
+    err.name === "SequelizeValidationError"
+  ) {
+    return res.status(400).send({ errors: err.errors.map((e) => e.message) });
+  }
+
   console.log(err.stack);
   res.status(500).send({ error: err });
 });
