@@ -1,7 +1,6 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = {
-  name: "00-add-blogs-and-users",
   up: async ({ context: queryInterface }) => {
     await queryInterface.createTable("blogs", {
       id: {
@@ -47,9 +46,6 @@ module.exports = {
         type: DataTypes.TEXT,
         allowNull: false,
         unique: true,
-        validate: {
-          isEmail: true,
-        },
       },
       created_at: {
         type: DataTypes.DATE,
