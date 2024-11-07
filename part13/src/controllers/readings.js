@@ -20,4 +20,17 @@ router.post("/", async (req, res) => {
   res.status(201).send(newReading);
 });
 
+router.put("/:id", async (req, res) => {
+  if (typeof req.body.read !== "boolean") {
+    return res.status(400).send({ error: "read invalid" });
+  }
+
+  const reading = await Reading.findByPk(req.params.id);
+
+  reading.read = req.body.read;
+  await reading.save();
+
+  return res.send(reading);
+});
+
 module.exports = router;
