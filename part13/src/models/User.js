@@ -22,6 +22,10 @@ User.init(
         isEmail: true,
       },
     },
+    isDisabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   {
     sequelize,
