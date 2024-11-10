@@ -32,7 +32,7 @@ Here's a list of the main parts of the course and my progress:
 - [ ] [Part 10: React Native](./part10)
 - [ ] [Part 11: CI/CD](./part11)
 - [x] [Part 12: Containers](./part12)
-- [ ] [Part 13: Using relational databases](./part13)
+- [x] [Part 13: Using relational databases](./part13)
 
 ## 📬 Contact
 
